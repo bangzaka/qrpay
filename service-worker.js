@@ -1,23 +1,22 @@
-const CACHE_NAME = "qrpay-cache-v1";
+const CACHE_NAME = "qrpay-cache-v2";
 
 const ASSETS = [
-  "./",
-  "index.html",
-  "manifest.json",
-  "app-icon-192.png",
-  "app-icon-512.png",
-  "maskable-512.png",
-  "pvc/qris.png",
-  "pvc/gpn.png",
-  // tambahkan file lain di sini jika dibutuhkan
+  "/qrpay/",
+  "/qrpay/index.html",
+  "/qrpay/manifest.json",
+  "/qrpay/app-icon-192.png",
+  "/qrpay/app-icon-512.png",
+  "/qrpay/maskable-512.png",
+  "/qrpay/pvc/qris.png",
+  "/qrpay/pvc/gpn.png",
 ];
 
-// Install — cache static assets
+// Install — cache statis
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
-  self.skipWaiting(); // langsung aktif tanpa reload
+  self.skipWaiting();
 });
 
 // Activate — bersihkan cache lama
@@ -26,40 +25,48 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
         })
       )
     )
   );
-  self.clients.claim(); // SW langsung kontrol semua tab
+  self.clients.claim();
 });
 
-// Fetch — Hybrid Strategy: Cache First + Network Fallback
+// Fetch — pengecualian untuk API QR
 self.addEventListener("fetch", (event) => {
-  const req = event.request;
+  const url = event.request.url;
 
-  // Abaikan request tertentu (misal: Supabase atau API eksternal)
-  if (req.url.includes("supabase") || req.url.includes("api")) {
-    event.respondWith(fetch(req).catch(() => new Response("")));
+  // 1️⃣ Lewatkan semua API eksternal (QR server, Supabase)
+  if (
+    url.includes("qrserver") ||
+    url.includes("quickchart") ||
+    url.includes("googleapis") ||
+    url.includes("supabase")
+  ) {
+    event.respondWith(fetch(event.request));
     return;
   }
 
-  // Cache First untuk file statis
+  // 2️⃣ Cache first untuk asset statis
   event.respondWith(
-    caches.match(req).then((cached) => {
+    caches.match(event.request).then((cached) => {
       return (
         cached ||
-        fetch(req)
+        fetch(event.request)
           .then((resp) => {
-            // simpan hasil fetch ke dynamic cache
             return caches.open(CACHE_NAME).then((cache) => {
-              cache.put(req, resp.clone());
+              cache.put(event.request, resp.clone());
               return resp;
             });
           })
           .catch(() => {
-            // fallback jika offline dan file tidak ada di cache
-            if (req.destination === "document") return caches.match("index.html");
+            // fallback jika offline
+            if (event.request.destination === "document") {
+              return caches.match("/qrpay/index.html");
+            }
           })
       );
     })
