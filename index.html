@@ -12,7 +12,7 @@
 
   <!-- Standar icons -->
  <link rel="icon" href="/qrpay/app-icon-192.png">
-  <link rel="apple-touch-icon" href="app-icon-192.png">
+  <link rel="apple-touch-icon" href="/qrpay/app-icon-192.png">
 
 
 <style>
@@ -199,12 +199,12 @@ async function compose(amountFinal, amountRaw, customer) {
 
   // LOGO QRIS
   const logoQris=new Image();
-  logoQris.src="pvc/qris.png";
+ logoQris.src="/qrpay/pvc/qris.png";
   await new Promise(r=>logoQris.onload=r);
 
   // LOGO GPN
   const logoGpn=new Image();
-  logoGpn.src="pvc/gpn.png";
+ logoGpn.src="/qrpay/pvc/gpn.png";
   await new Promise(r=>logoGpn.onload=r);
 
   ctx.drawImage(logoQris, 18, 22, 120, 40);
@@ -321,4 +321,5 @@ document.getElementById("shareBtn").addEventListener("click", async()=>{
 
 </body>
 </html>
+
 
