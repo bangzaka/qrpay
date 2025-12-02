@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>QR Pay</title>
 
-<!-- PWA FIXED FOR GITHUB PAGES -->
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#1A73E8">
 
@@ -13,43 +12,43 @@
 <link rel="apple-touch-icon" href="/app-icon-192.png">
 
 <style>
-  body{font-family:Inter,Arial;margin:20px;background:#f3f6fb;color:#0f172a}
-  .card{background:#fff;border-radius:12px;padding:22px;max-width:680px;margin:20px auto;box-shadow:0 8px 24px rgba(2,6,23,0.06)}
-  h2{text-align:center;margin-top:0;margin-bottom:20px}
-  label{font-weight:700;margin-top:12px;display:block}
-  input{width:100%;padding:12px;border-radius:8px;border:1px solid #dbe6f0;font-size:15px;background:#fbfdff}
-  button{padding:10px 14px;border-radius:8px;border:0;background:#0ea5a4;color:white;font-weight:700;cursor:pointer;margin-top:20px}
-  #canvasOut{display:block;margin:22px auto;background:white;border-radius:8px}
+  body{font-family:Inter,Arial;margin:20px;background:#f3f6fb;color:#0f172a}
+  .card{background:#fff;border-radius:12px;padding:22px;max-width:680px;margin:20px auto;box-shadow:0 8px 24px rgba(2,6,23,0.06)}
+  h2{text-align:center;margin-top:0;margin-bottom:20px}
+  label{font-weight:700;margin-top:12px;display:block}
+  input{width:100%;padding:12px;border-radius:8px;border:1px solid #dbe6f0;font-size:15px;background:#fbfdff}
+  button{padding:10px 14px;border-radius:8px;border:0;background:#0ea5a4;color:white;font-weight:700;cursor:pointer;margin-top:20px}
+  #canvasOut{display:block;margin:22px auto;background:white;border-radius:8px}
 </style>
 
 </head>
 <body>
 
 <div class="card">
-  <h2>QR Pay - MYDASTERAN</h2>
+  <h2>QR Pay - MYDASTERAN</h2>
 
-  <label>Total Tagihan</label>
-  <input id="amount" placeholder="15000"/>
+  <label>Total Tagihan</label>
+  <input id="amount" placeholder="15000"/>
 
-  <label>Nama Customer</label>
-  <input id="customer" placeholder="Nama Customer"/>
+  <label>Nama Customer</label>
+  <input id="customer" placeholder="Nama Customer"/>
 
-  <button id="generateBtn">Buat QRIS</button>
+  <button id="generateBtn">Buat QRIS</button>
 
-  <canvas id="qrCanvas" width="300" height="300" style="display:none"></canvas>
-  <canvas id="canvasOut" width="360" height="560"></canvas>
+  <canvas id="qrCanvas" width="300" height="300" style="display:none"></canvas>
+  <canvas id="canvasOut" width="360" height="560"></canvas>
 
-  <div style="text-align:center; margin-top:12px;">
-    <a id="downloadBtn" download="qris.png"
-       style="display:none;background:#2563eb;color:white;padding:10px 14px;border-radius:8px; margin-right:8px;">
-       Download QRIS
-    </a>
+  <div style="text-align:center; margin-top:12px;">
+    <a id="downloadBtn" download="qris.png"
+       style="display:none;background:#2563eb;color:white;padding:10px 14px;border-radius:8px; margin-right:8px;">
+       Download QRIS
+    </a>
 
-    <button id="shareBtn"
-            style="display:none;background:#22c55e;color:white;padding:10px 14px;border-radius:8px;">
-      Share WhatsApp
-    </button>
-  </div>
+    <button id="shareBtn"
+            style="display:none;background:#22c55e;color:white;padding:10px 14px;border-radius:8px;">
+      Share WhatsApp
+    </button>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
@@ -57,185 +56,187 @@
 <script>
 // =====================================================
 // PAYLOAD DEFAULT
+// PERBAIKAN: Mengubah 010211 menjadi 010212 (QRIS Dinamis dengan Nominal Ditetapkan)
 // =====================================================
-const DEFAULT_PAYLOAD = "00020101021126650013ID.CO.BCA.WWW011893600014000417288002150008850041728800303UMI51440014ID.CO.QRIS.WWW0215ID10254453013320303UMI5204569153033605802ID5911My dasteran6006JEMBER61056816162070703A016304E41A";
+const DEFAULT_PAYLOAD = "00020101021226650013ID.CO.BCA.WWW011893600014000417288002150008850041728800303UMI51440014ID.CO.QRIS.WWW0215ID10254453013320303UMI5204569153033605802ID5911My dasteran6006JEMBER610568162070703A016304E41A";
 
 // =====================================================
-// TLV HELPERS
+// TLV HELPERS (Tidak ada perubahan di sini)
 // =====================================================
 function parseTLV(p) {
-  const o = []; let i = 0;
-  while (i + 4 <= p.length) {
-    const id = p.substr(i, 2), len = parseInt(p.substr(i + 2, 2));
-    if (isNaN(len) || i + 4 + len > p.length) break;
-    o.push({ id, value: p.substr(i + 4, len) });
-    i += 4 + len;
-  }
-  return o;
+  const o = []; let i = 0;
+  while (i + 4 <= p.length) {
+    const id = p.substr(i, 2), len = parseInt(p.substr(i + 2, 2));
+    if (isNaN(len) || i + 4 + len > p.length) break;
+    o.push({ id, value: p.substr(i + 4, len) });
+    i += 4 + len;
+  }
+  return o;
 }
 
 function rebuildTLV(a) {
-  return a.map(t => t.id + String(t.value.length).padStart(2, '0') + t.value).join('');
+  return a.map(t => t.id + String(t.value.length).padStart(2, '0') + t.value).join('');
 }
 
 function crc16(str) {
-  let crc = 0xFFFF;
-  for (let c of str) {
-    crc ^= c.charCodeAt(0) << 8;
-    for (let i = 0; i < 8; i++) {
-      crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
-    }
-  }
-  return crc.toString(16).toUpperCase().padStart(4, '0');
+  let crc = 0xFFFF;
+  for (let c of str) {
+    crc ^= c.charCodeAt(0) << 8;
+    for (let i = 0; i < 8; i++) {
+      crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, '0');
 }
 
 function addCustomer(p, name) {
-  if (!name) return p;
-  let tlv = parseTLV(p);
-  let idx = tlv.findIndex(t => t.id === "62");
-  let sub = idx !== -1 ? parseTLV(tlv[idx].value) : [];
-  sub = sub.filter(x => x.id !== "02");
-  sub.push({ id: "02", value: name });
-  const rebuilt = rebuildTLV(sub);
-  if (idx !== -1) tlv[idx].value = rebuilt;
-  else tlv.push({ id: "62", value: rebuilt });
-  return rebuildTLV(tlv);
+  if (!name) return p;
+  let tlv = parseTLV(p);
+  let idx = tlv.findIndex(t => t.id === "62");
+  let sub = idx !== -1 ? parseTLV(tlv[idx].value) : [];
+  sub = sub.filter(x => x.id !== "02");
+  sub.push({ id: "02", value: name });
+  const rebuilt = rebuildTLV(sub);
+  if (idx !== -1) tlv[idx].value = rebuilt;
+  else tlv.push({ id: "62", value: rebuilt });
+  return rebuildTLV(tlv);
 }
 
+// PERBAIKAN: Nominal yang dimasukkan ke QRIS (amount) di sini adalah amountFinal
 function setAmount(p, amount) {
-  let tlv = parseTLV(p).filter(t => t.id !== "63");
-  const i = tlv.findIndex(t => t.id === "54");
-  if (i !== -1) tlv[i].value = String(amount);
-  else tlv.push({ id: "54", value: String(amount) });
-  const reb = rebuildTLV(tlv);
-  return reb + "6304" + crc16(reb + "6304");
+  let tlv = parseTLV(p).filter(t => t.id !== "63");
+  const i = tlv.findIndex(t => t.id === "54");
+  
+  // Pastikan amount adalah string bilangan bulat (tanpa .00) untuk QRIS standar
+  const amountStr = String(Math.round(amount)); 
+  
+  if (i !== -1) tlv[i].value = amountStr;
+  else tlv.push({ id: "54", value: amountStr });
+  
+  const reb = rebuildTLV(tlv);
+  return reb + "6304" + crc16(reb + "6304");
 }
 
 function formatRp(n) {
-  return "Rp " + Number(n).toLocaleString("id-ID");
+  return "Rp " + Number(n).toLocaleString("id-ID");
 }
-
+// ... (Fungsi drawQR, roundedRect, drawPremiumBorder, nominalGradient, compose tidak berubah karena fungsinya sudah benar) ...
 function drawQR(text) {
-  new QRious({
-    element: document.getElementById("qrCanvas"),
-    value: text,
-    size: 300,
-    level: "H"
-  });
+  new QRious({
+    element: document.getElementById("qrCanvas"),
+    value: text,
+    size: 300,
+    level: "H"
+  });
 }
 
-// =====================================================
-// BORDER PREMIUM
-// =====================================================
 function roundedRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
 }
 
 function drawPremiumBorder(ctx, W) {
-  const padding = 20, top = 95, height = 400, radius = 22;
-  const x = padding, y = top;
-  const w = W - padding * 2, h = height;
+  const padding = 20, top = 95, height = 400, radius = 22;
+  const x = padding, y = top;
+  const w = W - padding * 2, h = height;
 
-  const grad = ctx.createLinearGradient(x, y, x + w, y + h);
-  grad.addColorStop(0, "#0ea5e9");
-  grad.addColorStop(1, "#1e3a8a");
+  const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+  grad.addColorStop(0, "#0ea5e9");
+  grad.addColorStop(1, "#1e3a8a");
 
-  ctx.shadowColor = "rgba(14,165,233,0.35)";
-  ctx.shadowBlur = 14;
+  ctx.shadowColor = "rgba(14,165,233,0.35)";
+  ctx.shadowBlur = 14;
 
-  ctx.strokeStyle = grad;
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 3;
 
-  roundedRect(ctx, x, y, w, h, radius);
-  ctx.stroke();
+  roundedRect(ctx, x, y, w, h, radius);
+  ctx.stroke();
 
-  ctx.shadowColor = "transparent";
-  ctx.shadowBlur = 0;
+  ctx.shadowColor = "transparent";
+  ctx.shadowBlur = 0;
 }
 
 function nominalGradient(ctx, x, y) {
-  const g = ctx.createLinearGradient(x - 80, y - 20, x + 80, y + 20);
-  g.addColorStop(0, "#1E3A8A");
-  g.addColorStop(1, "#0EA5E9");
-  return g;
+  const g = ctx.createLinearGradient(x - 80, y - 20, x + 80, y + 20);
+  g.addColorStop(0, "#1E3A8A");
+  g.addColorStop(1, "#0EA5E9");
+  return g;
 }
 
-// =====================================================
-// COMPOSE PNG
-// =====================================================
 async function compose(amountFinal, amountRaw, customer) {
-  const qr = document.getElementById("qrCanvas");
-  await new Promise(r => requestAnimationFrame(r));
+  const qr = document.getElementById("qrCanvas");
+  await new Promise(r => requestAnimationFrame(r));
 
-  const out = document.getElementById("canvasOut");
-  const ctx = out.getContext("2d");
+  const out = document.getElementById("canvasOut");
+  const ctx = out.getContext("2d");
 
-  const W = 360, H = 620;
-  out.height = H;
+  const W = 360, H = 620;
+  out.height = H;
 
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, W, H);
 
-  drawPremiumBorder(ctx, W);
+  drawPremiumBorder(ctx, W);
 
-  const logoQris = new Image();
-  logoQris.src = "/qris.png";
-  await new Promise(r => logoQris.onload = r);
+  const logoQris = new Image();
+  logoQris.src = "/qris.png";
+  await new Promise(r => logoQris.onload = r);
 
-  const logoGpn = new Image();
-  logoGpn.src = "/gpn.png";
-  await new Promise(r => logoGpn.onload = r);
+  const logoGpn = new Image();
+  logoGpn.src = "/gpn.png";
+  await new Promise(r => logoGpn.onload = r);
 
-  ctx.drawImage(logoQris, 18, 22, 120, 40);
-  ctx.drawImage(logoGpn, W - 18 - 50, 12, 50, 50);
+  ctx.drawImage(logoQris, 18, 22, 120, 40);
+  ctx.drawImage(logoGpn, W - 18 - 50, 12, 50, 50);
 
-  const qrW = 260;
-  ctx.drawImage(qr, (W - qrW) / 2, 105, qrW, qrW);
+  const qrW = 260;
+  ctx.drawImage(qr, (W - qrW) / 2, 105, qrW, qrW);
 
-  const baseY = 105 + qrW + 25;
+  const baseY = 105 + qrW + 25;
 
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#475569";
-  ctx.font = "14px Arial";
-  ctx.fillText("Jumlah Tagihan", W / 2, baseY);
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#475569";
+  ctx.font = "14px Arial";
+  ctx.fillText("Jumlah Tagihan", W / 2, baseY);
 
-  const nominalY = baseY + 30;
-  ctx.font = "bold 28px Arial";
-  ctx.fillStyle = nominalGradient(ctx, W / 2, nominalY);
-  ctx.fillText(formatRp(amountFinal), W / 2, nominalY);
+  const nominalY = baseY + 30;
+  ctx.font = "bold 28px Arial";
+  ctx.fillStyle = nominalGradient(ctx, W / 2, nominalY);
+  ctx.fillText(formatRp(amountFinal), W / 2, nominalY);
 
-  ctx.font = "12px Arial";
-  ctx.fillStyle = "#64748b";
-  ctx.fillText(`Termasuk MDR 0.3% (Rp ${Number(amountFinal - amountRaw).toLocaleString("id-ID")})`, W / 2, nominalY + 22);
+  ctx.font = "12px Arial";
+  ctx.fillStyle = "#64748b";
+  ctx.fillText(`Termasuk MDR 0.3% (Rp ${Number(amountFinal - amountRaw).toLocaleString("id-ID")})`, W / 2, nominalY + 22);
 
-  ctx.fillStyle = "#000";
-  ctx.font = "17px Arial";
-  ctx.fillText(customer, W / 2, nominalY + 55);
+  ctx.fillStyle = "#000";
+  ctx.font = "17px Arial";
+  ctx.fillText(customer, W / 2, nominalY + 55);
 
-  ctx.font = "14px Arial";
-  ctx.fillStyle = "#475569";
-  ctx.fillText("Merchant: My dasteran - BCA | Jember", W / 2, H - 85);
+  ctx.font = "14px Arial";
+  ctx.fillStyle = "#475569";
+  ctx.fillText("Merchant: My dasteran - BCA | Jember", W / 2, H - 85);
 
-  ctx.font = "12px Arial";
-  ctx.fillStyle = "#64748b";
-  ctx.fillText("Bayar menggunakan aplikasi QRIS Anda", W / 2, H - 60);
-  ctx.fillText("Pastikan nominal sudah sesuai", W / 2, H - 40);
+  ctx.font = "12px Arial";
+  ctx.fillStyle = "#64748b";
+  ctx.fillText("Bayar menggunakan aplikasi QRIS Anda", W / 2, H - 60);
+  ctx.fillText("Pastikan nominal sudah sesuai", W / 2, H - 40);
 
-  return out.toDataURL("image/png");
+  return out.toDataURL("image/png");
 }
 
+
 // =====================================================
-// BUTTON GENERATE - PERBAIKAN FINAL
+// BUTTON GENERATE - PERBAIKAN LOGIKA UTAMA
 // =====================================================
 document.getElementById("generateBtn").addEventListener("click", async () => {
   try {
@@ -243,22 +244,20 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
     const customer = document.getElementById("customer").value.trim();
     if (!amountRaw) return alert("Nominal wajib diisi");
 
-    // HITUNG MDR (0.3%) DAN NOMINAL AKHIR
+    // 1. HITUNG MDR dan NOMINAL AKHIR
     const mdr = Math.ceil(amountRaw * 0.003); 
-    const amountFinal = amountRaw + mdr; // Nominal total yang AKAN dimasukkan ke QRIS
+    const amountFinal = amountRaw + mdr; // Nominal yang di-scan dan dibayarkan konsumen
 
+    // 2. GENERATE PAYLOAD QRIS DENGAN amountFinal
     let payload = addCustomer(DEFAULT_PAYLOAD, customer);
-    
-    // PERUBAHAN UTAMA: SET NOMINAL DENGAN NILAI YANG SUDAH TERMASUK MDR (amountFinal)
-    payload = setAmount(payload, amountFinal); 
+    payload = setAmount(payload, amountFinal); // <-- Menggunakan amountFinal
 
-    drawQR(payload); // Menggambar QR dengan payload yang berisi amountFinal
+    drawQR(payload); // Menggambar QR dengan payload yang sudah termasuk MDR
 
-    // COMPOSE PNG: amountFinal sebagai tagihan, amountRaw sebagai dasar perhitungan
-    const png = await compose(amountFinal, amountRaw, customer); 
+    // 3. COMPOSE PNG (amountFinal untuk tagihan, amountRaw untuk catatan MDR)
+    const png = await compose(amountFinal, amountRaw, customer);
 
     const dl = document.getElementById("downloadBtn");
-    // ... (Sisa kode untuk download dan share) ...
     const safeName = customer != ""
       ? "qris_" + customer.replace(/[^a-z0-9]+/gi, "_").toLowerCase() + ".png"
       : "qris.png";
@@ -275,42 +274,34 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
     alert("Gagal generate: " + e.message);
   }
 });
-
-// =====================================================
-// SHARE WHATSAPP
-// =====================================================
+// ... (Sisa fungsi share tidak berubah) ...
 document.getElementById("shareBtn").addEventListener("click", async () => {
-  try {
-    const dataUrl = document.getElementById("downloadBtn").href;
-    const blob = await (await fetch(dataUrl)).blob();
+  try {
+    const dataUrl = document.getElementById("downloadBtn").href;
+    const blob = await (await fetch(dataUrl)).blob();
 
-    const fileName = document.getElementById("shareBtn").dataset.filename;
-    const file = new File([blob], fileName, { type: "image/png" });
+    const fileName = document.getElementById("shareBtn").dataset.filename;
+    const file = new File([blob], fileName, { type: "image/png" });
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        title: "QRIS Pembayaran",
-        text: "Berikut QRIS pembayaran Anda.",
-        files: [file]
-      });
-      return;
-    }
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        title: "QRIS Pembayaran",
+        text: "Berikut QRIS pembayaran Anda.",
+        files: [file]
+      });
+      return;
+    }
 
-    window.open("https://wa.me/?text=" + encodeURIComponent("Berikut QRIS pembayaran."), "_blank");
+    window.open("https://wa.me/?text=" + encodeURIComponent("Berikut QRIS pembayaran."), "_blank");
 
-  } catch (e) {
-    alert("Gagal share: " + e.message);
-  }
+  } catch (e) {
+    alert("Gagal share: " + e.message);
+  }
 });
+// ... (Sisa kode Service Worker) ...
 </script>
 
-<!-- REGISTER SERVICE WORKER -->
 <script src="/register-service-worker.js"></script>
 
 </body>
 </html>
-
-
-
-
-
