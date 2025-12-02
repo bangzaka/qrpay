@@ -7,11 +7,11 @@
 
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#1A73E8">
-
 <link rel="icon" href="/app-icon-192.png">
 <link rel="apple-touch-icon" href="/app-icon-192.png">
 
 <style>
+/* CSS SUDAH DIRAPIKAN */
 body {
     font-family: Inter, Arial;
     margin: 20px;
@@ -54,13 +54,17 @@ button {
     cursor: pointer;
     margin-top: 20px;
 }
+/* Tambahkan ukuran dasar untuk penempatan Canvas */
 #canvasOut {
     display: block;
     margin: 22px auto;
     background: white;
     border-radius: 8px;
+    width: 360px; /* Ukuran dasar untuk tampilan browser */
+    height: 620px; /* Ukuran dasar untuk tampilan browser */
 }
 </style>
+
 </head>
 <body>
 
@@ -68,27 +72,23 @@ button {
   <h2>QR Pay - MYDASTERAN</h2>
 
   <label>Total Tagihan</label>
-  <input id="amount" placeholder="15000"/>
-
-  <label>Nama Customer</label>
+  <input id="amount" placeholder="15000" type="number" min="1"/>   <label>Nama Customer</label>
   <input id="customer" placeholder="Nama Customer"/>
 
   <button id="generateBtn">Buat QRIS</button>
 
   <canvas id="qrCanvas" width="300" height="300" style="display:none"></canvas>
-  <canvas id="canvasOut" width="360" height="560"></canvas>
+  <canvas id="canvasOut"></canvas>   <div style="text-align:center; margin-top:12px;">
+    <a id="downloadBtn" download="qris.png"
+       style="display:none;background:#2563eb;color:white;padding:10px 14px;border-radius:8px; margin-right:8px;">
+       Download QRIS
+    </a>
 
-  <div style="text-align:center; margin-top:12px;">
-    <a id="downloadBtn" download="qris.png"
-       style="display:none;background:#2563eb;color:white;padding:10px 14px;border-radius:8px; margin-right:8px;">
-       Download QRIS
-    </a>
-
-    <button id="shareBtn"
-            style="display:none;background:#22c55e;color:white;padding:10px 14px;border-radius:8px;">
-      Share WhatsApp
-    </button>
-  </div>
+    <button id="shareBtn"
+            style="display:none;background:#22c55e;color:white;padding:10px 14px;border-radius:8px;">
+      Share WhatsApp
+    </button>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
@@ -159,17 +159,18 @@ function formatRp(n) {
   return "Rp " + Number(n).toLocaleString("id-ID");
 }
 
+// Disempurnakan: Ukuran QR code diperbesar
 function drawQR(text) {
   new QRious({
     element: document.getElementById("qrCanvas"),
     value: text,
-    size: 300,
+    size: 600, // Ukuran QR code digandakan untuk resolusi yang lebih baik
     level: "H"
   });
 }
 
 // =====================================================
-// BORDER PREMIUM (Tidak ada perubahan)
+// BORDER PREMIUM
 // =====================================================
 function roundedRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -215,7 +216,7 @@ function nominalGradient(ctx, x, y) {
 }
 
 // =====================================================
-// COMPOSE PNG (Tidak ada perubahan)
+// COMPOSE PNG - DISMEPURNAKAN UNTUK RESOLUSI HD
 // =====================================================
 async function compose(amountFinal, amountRaw, customer) {
   const qr = document.getElementById("qrCanvas");
@@ -224,13 +225,21 @@ async function compose(amountFinal, amountRaw, customer) {
   const out = document.getElementById("canvasOut");
   const ctx = out.getContext("2d");
 
-  const W = 360, H = 620;
-  out.height = H;
+  // Faktor skala untuk HD
+  const scale = 2; 
+  const W_base = 360, H_base = 620;
+
+  // Atur lebar dan tinggi kanvas output ke nilai HD
+  out.width = W_base * scale;
+  out.height = H_base * scale;
+
+  // Skalakan seluruh konteks gambar
+  ctx.scale(scale, scale);
 
   ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillRect(0, 0, W_base, H_base); 
 
-  drawPremiumBorder(ctx, W);
+  drawPremiumBorder(ctx, W_base);
 
   const logoQris = new Image();
   logoQris.src = "/qris.png";
@@ -240,66 +249,73 @@ async function compose(amountFinal, amountRaw, customer) {
   logoGpn.src = "/gpn.png";
   await new Promise(r => logoGpn.onload = r);
 
+  // Gunakan W_base/H_base untuk semua koordinat dan ukuran (karena sudah di-scale)
   ctx.drawImage(logoQris, 18, 22, 120, 40);
-  ctx.drawImage(logoGpn, W - 18 - 50, 12, 50, 50);
+  ctx.drawImage(logoGpn, W_base - 18 - 50, 12, 50, 50);
 
-  const qrW = 260;
-  ctx.drawImage(qr, (W - qrW) / 2, 105, qrW, qrW);
+  const qrW_base = 260;
+  ctx.drawImage(qr, (W_base - qrW_base) / 2, 105, qrW_base, qrW_base);
 
-  const baseY = 105 + qrW + 25;
+  const baseY = 105 + qrW_base + 25;
 
   ctx.textAlign = "center";
   ctx.fillStyle = "#475569";
   ctx.font = "14px Arial";
-  ctx.fillText("Jumlah Tagihan", W / 2, baseY);
+  ctx.fillText("Jumlah Tagihan", W_base / 2, baseY);
 
   const nominalY = baseY + 30;
   ctx.font = "bold 28px Arial";
-  ctx.fillStyle = nominalGradient(ctx, W / 2, nominalY);
-  ctx.fillText(formatRp(amountFinal), W / 2, nominalY);
+  ctx.fillStyle = nominalGradient(ctx, W_base / 2, nominalY);
+  ctx.fillText(formatRp(amountFinal), W_base / 2, nominalY);
 
   ctx.font = "12px Arial";
   ctx.fillStyle = "#64748b";
-  ctx.fillText(`Termasuk MDR 0.3% (Rp ${Number(amountFinal - amountRaw).toLocaleString("id-ID")})`, W / 2, nominalY + 22);
+  ctx.fillText(`Termasuk MDR 0.3% (Rp ${Number(amountFinal - amountRaw).toLocaleString("id-ID")})`, W_base / 2, nominalY + 22);
 
   ctx.fillStyle = "#000";
   ctx.font = "17px Arial";
-  ctx.fillText(customer, W / 2, nominalY + 55);
+  ctx.fillText(customer, W_base / 2, nominalY + 55);
 
   ctx.font = "14px Arial";
   ctx.fillStyle = "#475569";
-  ctx.fillText("Merchant: My dasteran - BCA | Jember", W / 2, H - 85);
+  ctx.fillText("Merchant: My dasteran - BCA | Jember", W_base / 2, H_base - 85);
 
   ctx.font = "12px Arial";
   ctx.fillStyle = "#64748b";
-  ctx.fillText("Bayar menggunakan aplikasi QRIS Anda", W / 2, H - 60);
-  ctx.fillText("Pastikan nominal sudah sesuai", W / 2, H - 40);
+  ctx.fillText("Bayar menggunakan aplikasi QRIS Anda", W_base / 2, H_base - 60);
+  ctx.fillText("Pastikan nominal sudah sesuai", W_base / 2, H_base - 40);
 
   return out.toDataURL("image/png");
 }
 
 // =====================================================
-// BUTTON GENERATE (Menggunakan amountFinal untuk payload)
+// BUTTON GENERATE - DISMEPURNAKAN DENGAN VALIDASI INPUT
 // =====================================================
 document.getElementById("generateBtn").addEventListener("click", async () => {
   try {
-    const amountRaw = Number(document.getElementById("amount").value.trim());
+    // Validasi input
+    const inputAmount = document.getElementById("amount").value.trim();
+    const amountRaw = Number(inputAmount);
     const customer = document.getElementById("customer").value.trim();
-    if (!amountRaw) return alert("Nominal wajib diisi");
 
-    // 1. HITUNG MDR dan NOMINAL AKHIR
+    if (!amountRaw || isNaN(amountRaw) || amountRaw <= 0) {
+      return alert("Nominal wajib diisi dan harus berupa angka positif.");
+    }
+
+    // HITUNG MDR dan NOMINAL AKHIR
     const mdr = Math.ceil(amountRaw * 0.003); 
     const amountFinal = amountRaw + mdr; 
 
-    // 2. GENERATE PAYLOAD QRIS DENGAN amountFinal
+    // GENERATE PAYLOAD QRIS DENGAN amountFinal
     let payload = addCustomer(DEFAULT_PAYLOAD, customer);
     payload = setAmount(payload, amountFinal); 
 
     drawQR(payload); 
 
-    // 3. COMPOSE PNG
+    // COMPOSE PNG
     const png = await compose(amountFinal, amountRaw, customer);
 
+    // ... (Sisa kode download dan share) ...
     const dl = document.getElementById("downloadBtn");
     const safeName = customer != ""
       ? "qris_" + customer.replace(/[^a-z0-9]+/gi, "_").toLowerCase() + ".png"
@@ -319,7 +335,7 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
 });
 
 // =====================================================
-// SHARE WHATSAPP (Tidak ada perubahan)
+// SHARE WHATSAPP
 // =====================================================
 document.getElementById("shareBtn").addEventListener("click", async () => {
   try {
@@ -350,4 +366,3 @@ document.getElementById("shareBtn").addEventListener("click", async () => {
 
 </body>
 </html>
-
