@@ -58,180 +58,178 @@
 // =====================================================
 // PAYLOAD DEFAULT
 // =====================================================
-const DEFAULT_PAYLOAD =
-"00020101021126650013ID.CO.BCA.WWW011893600014000417288002150008850041728800303UMI51440014ID.CO.QRIS.WWW0215ID10254453013320303UMI5204569153033605802ID5911My dasteran6006JEMBER61056816162070703A016304E41A";
+const DEFAULT_PAYLOAD = "00020101021126650013ID.CO.BCA.WWW011893600014000417288002150008850041728800303UMI51440014ID.CO.QRIS.WWW0215ID10254453013320303UMI5204569153033605802ID5911My dasteran6006JEMBER61056816162070703A016304E41A";
 
 // =====================================================
 // TLV HELPERS
 // =====================================================
-function parseTLV(p){
-  const o=[];let i=0;
-  while(i+4<=p.length){
-    const id=p.substr(i,2),len=parseInt(p.substr(i+2,2));
-    if(isNaN(len)||i+4+len>p.length)break;
-    o.push({id,value:p.substr(i+4,len)});
-    i+=4+len;
+function parseTLV(p) {
+  const o = []; let i = 0;
+  while (i + 4 <= p.length) {
+    const id = p.substr(i, 2), len = parseInt(p.substr(i + 2, 2));
+    if (isNaN(len) || i + 4 + len > p.length) break;
+    o.push({ id, value: p.substr(i + 4, len) });
+    i += 4 + len;
   }
   return o;
 }
 
-function rebuildTLV(a){
-  return a.map(t=>t.id+String(t.value.length).padStart(2,'0')+t.value).join('');
+function rebuildTLV(a) {
+  return a.map(t => t.id + String(t.value.length).padStart(2, '0') + t.value).join('');
 }
 
-function crc16(str){
-  let crc=0xFFFF;
-  for(let c of str){
-    crc^=c.charCodeAt(0)<<8;
-    for(let i=0;i<8;i++){
-      crc=(crc&0x8000)?((crc<<1)^0x1021)&0xFFFF:(crc<<1)&0xFFFF;
+function crc16(str) {
+  let crc = 0xFFFF;
+  for (let c of str) {
+    crc ^= c.charCodeAt(0) << 8;
+    for (let i = 0; i < 8; i++) {
+      crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
     }
   }
-  return crc.toString(16).toUpperCase().padStart(4,'0');
+  return crc.toString(16).toUpperCase().padStart(4, '0');
 }
 
-function addCustomer(p,name){
-  if(!name)return p;
-  let tlv=parseTLV(p);
-  let idx=tlv.findIndex(t=>t.id==="62");
-  let sub=idx!==-1?parseTLV(tlv[idx].value):[];
-  sub=sub.filter(x=>x.id!=="02");
-  sub.push({id:"02",value:name});
-  const rebuilt=rebuildTLV(sub);
-  if(idx!==-1) tlv[idx].value=rebuilt;
-  else tlv.push({id:"62",value:rebuilt});
+function addCustomer(p, name) {
+  if (!name) return p;
+  let tlv = parseTLV(p);
+  let idx = tlv.findIndex(t => t.id === "62");
+  let sub = idx !== -1 ? parseTLV(tlv[idx].value) : [];
+  sub = sub.filter(x => x.id !== "02");
+  sub.push({ id: "02", value: name });
+  const rebuilt = rebuildTLV(sub);
+  if (idx !== -1) tlv[idx].value = rebuilt;
+  else tlv.push({ id: "62", value: rebuilt });
   return rebuildTLV(tlv);
 }
 
-function setAmount(p,amount){
-  let tlv=parseTLV(p).filter(t=>t.id!=="63");
-  const i=tlv.findIndex(t=>t.id==="54");
-  if(i!==-1) tlv[i].value=String(amount);
-  else tlv.push({id:"54",value:String(amount)});
-  const reb=rebuildTLV(tlv);
-  return reb+"6304"+crc16(reb+"6304");
+function setAmount(p, amount) {
+  let tlv = parseTLV(p).filter(t => t.id !== "63");
+  const i = tlv.findIndex(t => t.id === "54");
+  if (i !== -1) tlv[i].value = String(amount);
+  else tlv.push({ id: "54", value: String(amount) });
+  const reb = rebuildTLV(tlv);
+  return reb + "6304" + crc16(reb + "6304");
 }
 
-function formatRp(n){
-  return "Rp "+Number(n).toLocaleString("id-ID");
+function formatRp(n) {
+  return "Rp " + Number(n).toLocaleString("id-ID");
 }
 
-function drawQR(text){
+function drawQR(text) {
   new QRious({
-    element:document.getElementById("qrCanvas"),
-    value:text,size:300,level:"H"
+    element: document.getElementById("qrCanvas"),
+    value: text,
+    size: 300,
+    level: "H"
   });
 }
 
 // =====================================================
 // BORDER PREMIUM
 // =====================================================
-function roundedRect(ctx, x, y, w, h, r){
+function roundedRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x+r, y);
-  ctx.lineTo(x+w-r, y);
-  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-  ctx.lineTo(x+w, y+h-r);
-  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-  ctx.lineTo(x+r, y+h);
-  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-  ctx.lineTo(x, y+r);
-  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
 }
 
-function drawPremiumBorder(ctx, W){
-  const padding=20, top=95, height=400, radius=22;
-  const x=padding, y=top;
-  const w=W-padding*2, h=height;
+function drawPremiumBorder(ctx, W) {
+  const padding = 20, top = 95, height = 400, radius = 22;
+  const x = padding, y = top;
+  const w = W - padding * 2, h = height;
 
-  const grad=ctx.createLinearGradient(x,y,x+w,y+h);
-  grad.addColorStop(0,"#0ea5e9");
-  grad.addColorStop(1,"#1e3a8a");
+  const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+  grad.addColorStop(0, "#0ea5e9");
+  grad.addColorStop(1, "#1e3a8a");
 
-  ctx.shadowColor="rgba(14,165,233,0.35)";
-  ctx.shadowBlur=14;
+  ctx.shadowColor = "rgba(14,165,233,0.35)";
+  ctx.shadowBlur = 14;
 
-  ctx.strokeStyle=grad;
-  ctx.lineWidth=3;
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 3;
 
-  roundedRect(ctx,x,y,w,h,radius);
+  roundedRect(ctx, x, y, w, h, radius);
   ctx.stroke();
 
-  ctx.shadowColor="transparent";
-  ctx.shadowBlur=0;
+  ctx.shadowColor = "transparent";
+  ctx.shadowBlur = 0;
 }
 
-function nominalGradient(ctx,x,y){
-  const g=ctx.createLinearGradient(x-80,y-20,x+80,y+20);
-  g.addColorStop(0,"#1E3A8A");
-  g.addColorStop(1,"#0EA5E9");
+function nominalGradient(ctx, x, y) {
+  const g = ctx.createLinearGradient(x - 80, y - 20, x + 80, y + 20);
+  g.addColorStop(0, "#1E3A8A");
+  g.addColorStop(1, "#0EA5E9");
   return g;
 }
 
 // =====================================================
 // COMPOSE PNG
 // =====================================================
-async function compose(amountFinal, amountRaw, customer){
-  const qr=document.getElementById("qrCanvas");
-  await new Promise(r=>requestAnimationFrame(r));
+async function compose(amountFinal, amountRaw, customer) {
+  const qr = document.getElementById("qrCanvas");
+  await new Promise(r => requestAnimationFrame(r));
 
-  const out=document.getElementById("canvasOut");
-  const ctx=out.getContext("2d");
+  const out = document.getElementById("canvasOut");
+  const ctx = out.getContext("2d");
 
-  const W=360, H=620;
-  out.height=H;
+  const W = 360, H = 620;
+  out.height = H;
 
-  ctx.fillStyle="#fff";
-  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, W, H);
 
-  drawPremiumBorder(ctx,W);
+  drawPremiumBorder(ctx, W);
 
-  const logoQris=new Image();
-  logoQris.src="/qris.png";
-  await new Promise(r=>logoQris.onload=r);
+  const logoQris = new Image();
+  logoQris.src = "/qris.png";
+  await new Promise(r => logoQris.onload = r);
 
-  const logoGpn=new Image();
-  logoGpn.src="/gpn.png";
-  await new Promise(r=>logoGpn.onload=r);
+  const logoGpn = new Image();
+  logoGpn.src = "/gpn.png";
+  await new Promise(r => logoGpn.onload = r);
 
-  ctx.drawImage(logoQris,18,22,120,40);
-  ctx.drawImage(logoGpn,W-18-50,12,50,50);
+  ctx.drawImage(logoQris, 18, 22, 120, 40);
+  ctx.drawImage(logoGpn, W - 18 - 50, 12, 50, 50);
 
-  const qrW=260;
-  ctx.drawImage(qr,(W-qrW)/2,105,qrW,qrW);
+  const qrW = 260;
+  ctx.drawImage(qr, (W - qrW) / 2, 105, qrW, qrW);
 
-  const baseY=105+qrW+25;
+  const baseY = 105 + qrW + 25;
 
-  ctx.textAlign="center";
-  ctx.fillStyle="#475569";
-  ctx.font="14px Arial";
-  ctx.fillText("Jumlah Tagihan",W/2,baseY);
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#475569";
+  ctx.font = "14px Arial";
+  ctx.fillText("Jumlah Tagihan", W / 2, baseY);
 
-  const nominalY=baseY+30;
-  ctx.font="bold 28px Arial";
-  ctx.fillStyle=nominalGradient(ctx,W/2,nominalY);
-  ctx.fillText(formatRp(amountFinal),W/2,nominalY);
+  const nominalY = baseY + 30;
+  ctx.font = "bold 28px Arial";
+  ctx.fillStyle = nominalGradient(ctx, W / 2, nominalY);
+  ctx.fillText(formatRp(amountFinal), W / 2, nominalY);
 
-  ctx.font="12px Arial";
-  ctx.fillStyle="#64748b";
-  ctx.fillText(
-    `Termasuk MDR 0.3% (Rp ${Number(amountFinal-amountRaw).toLocaleString("id-ID")})`,
-    W/2, nominalY+22
-  );
+  ctx.font = "12px Arial";
+  ctx.fillStyle = "#64748b";
+  ctx.fillText(`Termasuk MDR 0.3% (Rp ${Number(amountFinal - amountRaw).toLocaleString("id-ID")})`, W / 2, nominalY + 22);
 
-  ctx.fillStyle="#000";
-  ctx.font="17px Arial";
-  ctx.fillText(customer,W/2,nominalY+55);
+  ctx.fillStyle = "#000";
+  ctx.font = "17px Arial";
+  ctx.fillText(customer, W / 2, nominalY + 55);
 
-  ctx.font="14px Arial";
-  ctx.fillStyle="#475569";
-  ctx.fillText("Merchant: My dasteran - BCA | Jember",W/2,H-85);
+  ctx.font = "14px Arial";
+  ctx.fillStyle = "#475569";
+  ctx.fillText("Merchant: My dasteran - BCA | Jember", W / 2, H - 85);
 
-  ctx.font="12px Arial";
-  ctx.fillStyle="#64748b";
-  ctx.fillText("Bayar menggunakan aplikasi QRIS Anda",W/2,H-60);
-  ctx.fillText("Pastikan nominal sudah sesuai",W/2,H-40);
+  ctx.font = "12px Arial";
+  ctx.fillStyle = "#64748b";
+  ctx.fillText("Bayar menggunakan aplikasi QRIS Anda", W / 2, H - 60);
+  ctx.fillText("Pastikan nominal sudah sesuai", W / 2, H - 40);
 
   return out.toDataURL("image/png");
 }
@@ -239,64 +237,64 @@ async function compose(amountFinal, amountRaw, customer){
 // =====================================================
 // BUTTON GENERATE
 // =====================================================
-document.getElementById("generateBtn").addEventListener("click", async()=>{
-  try{
-    const amountRaw=Number(document.getElementById("amount").value.trim());
-    const customer=document.getElementById("customer").value.trim();
-    if(!amountRaw)return alert("Nominal wajib diisi");
+document.getElementById("generateBtn").addEventListener("click", async () => {
+  try {
+    const amountRaw = Number(document.getElementById("amount").value.trim());
+    const customer = document.getElementById("customer").value.trim();
+    if (!amountRaw) return alert("Nominal wajib diisi");
 
-    const mdr=Math.ceil(amountRaw*0.003);
-    const amountFinal=amountRaw+mdr;
+    const mdr = Math.ceil(amountRaw * 0.003);
+    const amountFinal = amountRaw + mdr;
 
-    let payload=addCustomer(DEFAULT_PAYLOAD,customer);
-    payload=setAmount(payload,amountRaw);
+    let payload = addCustomer(DEFAULT_PAYLOAD, customer);
+    payload = setAmount(payload, amountRaw);
 
     drawQR(payload);
 
-    const png=await compose(amountFinal,amountRaw,customer);
+    const png = await compose(amountFinal, amountRaw, customer);
 
-    const dl=document.getElementById("downloadBtn");
-    const safeName=customer!=""
-      ?"qris_"+customer.replace(/[^a-z0-9]+/gi,"_").toLowerCase()+".png"
-      :"qris.png";
+    const dl = document.getElementById("downloadBtn");
+    const safeName = customer != ""
+      ? "qris_" + customer.replace(/[^a-z0-9]+/gi, "_").toLowerCase() + ".png"
+      : "qris.png";
 
-    dl.href=png;
-    dl.download=safeName;
-    dl.style.display="inline-block";
+    dl.href = png;
+    dl.download = safeName;
+    dl.style.display = "inline-block";
 
-    const s=document.getElementById("shareBtn");
-    s.setAttribute("data-filename",safeName);
-    s.style.display="inline-block";
+    const s = document.getElementById("shareBtn");
+    s.setAttribute("data-filename", safeName);
+    s.style.display = "inline-block";
 
-  }catch(e){
-    alert("Gagal generate: "+e.message);
+  } catch (e) {
+    alert("Gagal generate: " + e.message);
   }
 });
 
 // =====================================================
 // SHARE WHATSAPP
 // =====================================================
-document.getElementById("shareBtn").addEventListener("click",async()=>{
-  try{
-    const dataUrl=document.getElementById("downloadBtn").href;
-    const blob=await (await fetch(dataUrl)).blob();
+document.getElementById("shareBtn").addEventListener("click", async () => {
+  try {
+    const dataUrl = document.getElementById("downloadBtn").href;
+    const blob = await (await fetch(dataUrl)).blob();
 
-    const fileName=document.getElementById("shareBtn").dataset.filename;
-    const file=new File([blob],fileName,{type:"image/png"});
+    const fileName = document.getElementById("shareBtn").dataset.filename;
+    const file = new File([blob], fileName, { type: "image/png" });
 
-    if(navigator.canShare && navigator.canShare({files:[file]})){
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
-        title:"QRIS Pembayaran",
-        text:"Berikut QRIS pembayaran Anda.",
-        files:[file]
+        title: "QRIS Pembayaran",
+        text: "Berikut QRIS pembayaran Anda.",
+        files: [file]
       });
       return;
     }
 
-    window.open("https://wa.me/?text="+encodeURIComponent("Berikut QRIS pembayaran."),"_blank");
+    window.open("https://wa.me/?text=" + encodeURIComponent("Berikut QRIS pembayaran."), "_blank");
 
-  }catch(e){
-    alert("Gagal share: "+e.message);
+  } catch (e) {
+    alert("Gagal share: " + e.message);
   }
 });
 </script>
@@ -306,5 +304,6 @@ document.getElementById("shareBtn").addEventListener("click",async()=>{
 
 </body>
 </html>
+
 
 
