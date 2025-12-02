@@ -3,65 +3,145 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>QR Pay</title>
+<title>QR Pay - PWA Mobile</title>
 
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#1A73E8">
+<meta name="theme-color" content="#0ea5e9"> 
 <link rel="icon" href="/app-icon-192.png">
 <link rel="apple-touch-icon" href="/app-icon-192.png">
 
 <style>
-/* CSS SUDAH DIRAPIKAN */
+/* FONT FALLBACK */
+:root {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+/* BASE STYLING */
 body {
-    font-family: Inter, Arial;
-    margin: 20px;
-    background: #f3f6fb;
-    color: #0f172a;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: #f0f4f8; /* Latar belakang lebih lembut */
+    color: #1a202c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 }
+
+/* CARD CONTAINER */
 .card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 22px;
-    max-width: 680px;
+    background: #ffffff;
+    border-radius: 16px; 
+    padding: 24px;
+    width: 90%;
+    max-width: 400px; 
     margin: 20px auto;
-    box-shadow: 0 8px 24px rgba(2,6,23,0.06);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Bayangan modern */
+    box-sizing: border-box;
 }
+
 h2 {
     text-align: center;
+    font-size: 1.5rem;
     margin-top: 0;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    color: #0d47a1;
 }
+
+/* INPUT & LABEL */
 label {
-    font-weight: 700;
-    margin-top: 12px;
+    font-weight: 600;
+    margin-top: 15px;
     display: block;
+    font-size: 0.95rem;
+    color: #4a5568;
 }
+
 input {
     width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #dbe6f0;
-    font-size: 15px;
-    background: #fbfdff;
+    padding: 14px 10px; /* Area sentuh lebih besar */
+    border-radius: 10px;
+    border: 1px solid #cbd5e0;
+    font-size: 1.1rem;
+    background: #f7fafc;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
 }
-button {
-    padding: 10px 14px;
-    border-radius: 8px;
+input:focus {
+    border-color: #4299e1;
+    outline: none;
+}
+
+/* BUTTON UTAMA */
+#generateBtn {
+    width: 100%; 
+    padding: 15px 14px; 
+    border-radius: 10px;
     border: 0;
-    background: #0ea5a4;
+    background: #0ea5e9; /* Warna utama */
     color: white;
     font-weight: 700;
     cursor: pointer;
-    margin-top: 20px;
+    margin-top: 30px;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
-/* Tambahkan ukuran dasar untuk penempatan Canvas */
+#generateBtn:active {
+    background: #078dd4; 
+    box-shadow: none;
+}
+
+/* CANVAS OUTPUT */
 #canvasOut {
     display: block;
-    margin: 22px auto;
+    margin: 25px auto;
     background: white;
-    border-radius: 8px;
-    width: 360px; /* Ukuran dasar untuk tampilan browser */
-    height: 620px; /* Ukuran dasar untuk tampilan browser */
+    border-radius: 10px;
+    /* Ukuran dasar untuk tampilan browser */
+    width: 360px;
+    height: 620px; 
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* DOWNLOAD & SHARE CONTAINER */
+.card > div:last-child {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* DOWNLOAD & SHARE BUTTONS */
+#downloadBtn, #shareBtn {
+    /* Style inline di HTML akan override display:none; ini */
+    display: flex !important; 
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+    flex-grow: 1; 
+    max-width: 180px;
+    transition: opacity 0.3s;
+}
+
+#downloadBtn {
+    background: #2563eb;
+    color: white;
+}
+
+#shareBtn {
+    background: #22c55e;
+    color: white;
+}
+
+#downloadBtn:active, #shareBtn:active {
+    opacity: 0.8;
 }
 </style>
 
@@ -72,20 +152,24 @@ button {
   <h2>QR Pay - MYDASTERAN</h2>
 
   <label>Total Tagihan</label>
-  <input id="amount" placeholder="15000" type="number" min="1"/>   <label>Nama Customer</label>
+  <input id="amount" placeholder="15000" type="number" min="1"/>
+
+  <label>Nama Customer</label>
   <input id="customer" placeholder="Nama Customer"/>
 
   <button id="generateBtn">Buat QRIS</button>
 
   <canvas id="qrCanvas" width="300" height="300" style="display:none"></canvas>
-  <canvas id="canvasOut"></canvas>   <div style="text-align:center; margin-top:12px;">
+  <canvas id="canvasOut"></canvas>
+
+  <div style="text-align:center; margin-top:12px;">
     <a id="downloadBtn" download="qris.png"
-       style="display:none;background:#2563eb;color:white;padding:10px 14px;border-radius:8px; margin-right:8px;">
+       style="display:none;background:#2563eb;color:white;padding:12px 18px;border-radius:10px; margin-right:8px;">
        Download QRIS
     </a>
 
     <button id="shareBtn"
-            style="display:none;background:#22c55e;color:white;padding:10px 14px;border-radius:8px;">
+            style="display:none;background:#22c55e;color:white;padding:12px 18px;border-radius:10px;">
       Share WhatsApp
     </button>
   </div>
@@ -96,7 +180,7 @@ button {
 <script>
 // =====================================================
 // PAYLOAD DEFAULT
-// Menggunakan 010212 (QRIS Dinamis dengan Nominal Ditetapkan)
+// ID 010212 (QRIS Dinamis - Nominal Ditetapkan)
 // =====================================================
 const DEFAULT_PAYLOAD = "00020101021226650013ID.CO.BCA.WWW011893600014000417288002150008850041728800303UMI51440014ID.CO.QRIS.WWW0215ID10254453013320303UMI5204569153033605802ID5911My dasteran6006JEMBER610568162070703A016304E41A";
 
@@ -146,6 +230,7 @@ function setAmount(p, amount) {
   let tlv = parseTLV(p).filter(t => t.id !== "63");
   const i = tlv.findIndex(t => t.id === "54");
   
+  // Memastikan nominal adalah bilangan bulat
   const amountStr = String(Math.round(amount)); 
   
   if (i !== -1) tlv[i].value = amountStr;
@@ -159,18 +244,18 @@ function formatRp(n) {
   return "Rp " + Number(n).toLocaleString("id-ID");
 }
 
-// Disempurnakan: Ukuran QR code diperbesar
+// FUNGSI INTI - Meningkatkan resolusi QR code
 function drawQR(text) {
   new QRious({
     element: document.getElementById("qrCanvas"),
     value: text,
-    size: 600, // Ukuran QR code digandakan untuk resolusi yang lebih baik
+    size: 600, // Ukuran digandakan untuk HD
     level: "H"
   });
 }
 
 // =====================================================
-// BORDER PREMIUM
+// BORDER & GRADIENT
 // =====================================================
 function roundedRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -216,7 +301,7 @@ function nominalGradient(ctx, x, y) {
 }
 
 // =====================================================
-// COMPOSE PNG - DISMEPURNAKAN UNTUK RESOLUSI HD
+// COMPOSE PNG - Menerapkan faktor skala untuk HD
 // =====================================================
 async function compose(amountFinal, amountRaw, customer) {
   const qr = document.getElementById("qrCanvas");
@@ -229,12 +314,9 @@ async function compose(amountFinal, amountRaw, customer) {
   const scale = 2; 
   const W_base = 360, H_base = 620;
 
-  // Atur lebar dan tinggi kanvas output ke nilai HD
   out.width = W_base * scale;
   out.height = H_base * scale;
-
-  // Skalakan seluruh konteks gambar
-  ctx.scale(scale, scale);
+  ctx.scale(scale, scale); // Skalakan seluruh konteks
 
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, W_base, H_base); 
@@ -249,7 +331,7 @@ async function compose(amountFinal, amountRaw, customer) {
   logoGpn.src = "/gpn.png";
   await new Promise(r => logoGpn.onload = r);
 
-  // Gunakan W_base/H_base untuk semua koordinat dan ukuran (karena sudah di-scale)
+  // Menggambar dengan koordinat dasar
   ctx.drawImage(logoQris, 18, 22, 120, 40);
   ctx.drawImage(logoGpn, W_base - 18 - 50, 12, 50, 50);
 
@@ -289,11 +371,11 @@ async function compose(amountFinal, amountRaw, customer) {
 }
 
 // =====================================================
-// BUTTON GENERATE - DISMEPURNAKAN DENGAN VALIDASI INPUT
+// BUTTON GENERATE (LOGIKA QRIS TIDAK BERUBAH)
 // =====================================================
 document.getElementById("generateBtn").addEventListener("click", async () => {
   try {
-    // Validasi input
+    // Validasi input (Fungsi tidak berubah)
     const inputAmount = document.getElementById("amount").value.trim();
     const amountRaw = Number(inputAmount);
     const customer = document.getElementById("customer").value.trim();
@@ -302,20 +384,19 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
       return alert("Nominal wajib diisi dan harus berupa angka positif.");
     }
 
-    // HITUNG MDR dan NOMINAL AKHIR
+    // Hitung MDR (Fungsi tidak berubah)
     const mdr = Math.ceil(amountRaw * 0.003); 
     const amountFinal = amountRaw + mdr; 
 
-    // GENERATE PAYLOAD QRIS DENGAN amountFinal
+    // Masukkan amountFinal ke payload QRIS (Fungsi tidak berubah)
     let payload = addCustomer(DEFAULT_PAYLOAD, customer);
     payload = setAmount(payload, amountFinal); 
 
     drawQR(payload); 
 
-    // COMPOSE PNG
+    // Compose PNG
     const png = await compose(amountFinal, amountRaw, customer);
 
-    // ... (Sisa kode download dan share) ...
     const dl = document.getElementById("downloadBtn");
     const safeName = customer != ""
       ? "qris_" + customer.replace(/[^a-z0-9]+/gi, "_").toLowerCase() + ".png"
@@ -323,11 +404,11 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
 
     dl.href = png;
     dl.download = safeName;
-    dl.style.display = "inline-block";
+    dl.style.display = "flex"; // Menggunakan flex untuk alignment (perbaikan style)
 
     const s = document.getElementById("shareBtn");
     s.setAttribute("data-filename", safeName);
-    s.style.display = "inline-block";
+    s.style.display = "flex"; // Menggunakan flex untuk alignment (perbaikan style)
 
   } catch (e) {
     alert("Gagal generate: " + e.message);
