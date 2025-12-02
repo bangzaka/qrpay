@@ -7,8 +7,8 @@ const ASSETS = [
   "/qrpay/app-icon-192.png",
   "/qrpay/app-icon-512.png",
   "/qrpay/maskable-512.png",
-  "/qrpay/pvc/qris.png",
-  "/qrpay/pvc/gpn.png",
+  "/qrpay/qris.png",
+  "/qrpay/gpn.png",
 ];
 
 // Install — cache statis
@@ -72,3 +72,4 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
