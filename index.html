@@ -448,7 +448,7 @@ async function compose(amountFinal, amountRaw, customer, mdrFinal) {
   ctx.fillStyle = "#64748b";
   
   let Text;
-  if (Final > 0) {
+  if (mdrFinal > 0) {
     mdrText = `Termasuk Biaya MDR 0.1% (Rp ${Number(mdrFinal).toLocaleString("id-ID")})`;
   } else {
     mdrText = `Biaya MDR 0% (Gratis Potongan)`;
@@ -559,5 +559,6 @@ document.getElementById("shareBtn").addEventListener("click", async () => {
 
 </body>
 </html>
+
 
 
