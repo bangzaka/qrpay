@@ -443,15 +443,15 @@ async function compose(amountFinal, amountRaw, customer, mdrFinal) {
   ctx.fillStyle = nominalGradient(ctx, W_base / 2, nominalY);
   ctx.fillText(formatRp(amountFinal), W_base / 2, nominalY);
 
-  // LOGIKA TAMPILAN MDR
+  // LOGIKA TAMPILAN 
   ctx.font = "12px Arial";
   ctx.fillStyle = "#64748b";
   
-  let mdrText;
-  if (mdrFinal > 0) {
-    mdrText = `Termasuk MDR 0.15% (Rp ${Number(mdrFinal).toLocaleString("id-ID")})`;
+  let Text;
+  if (Final > 0) {
+    mdrText = `Termasuk Biaya MDR 0.1% (Rp ${Number(mdrFinal).toLocaleString("id-ID")})`;
   } else {
-    mdrText = `MDR 0% (Gratis Potongan)`;
+    mdrText = `Biaya MDR 0% (Gratis Potongan)`;
   }
   
   ctx.fillText(mdrText, W_base / 2, nominalY + 22);
@@ -488,7 +488,7 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
 
     // --- LOGIKA PERHITUNGAN MDR ---
     let mdr = 0;
-    const batasMDR0 = 500000;
+    const batasMDR0 = 1000000;
     const tarifMDR = 0.0015; // 0.15%
 
     if (amountRaw > batasMDR0) {
@@ -559,4 +559,5 @@ document.getElementById("shareBtn").addEventListener("click", async () => {
 
 </body>
 </html>
+
 
