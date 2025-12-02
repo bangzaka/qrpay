@@ -6,11 +6,11 @@
 <title>QR Pay</title>
 
 <!-- PWA FIXED FOR GITHUB PAGES -->
-<link rel="manifest" href="/qrpay/manifest.json">
+<link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#1A73E8">
 
-<link rel="icon" href="/qrpay/app-icon-192.png">
-<link rel="apple-touch-icon" href="/qrpay/app-icon-192.png">
+<link rel="icon" href="/app-icon-192.png">
+<link rel="apple-touch-icon" href="/app-icon-192.png">
 
 <style>
   body{font-family:Inter,Arial;margin:20px;background:#f3f6fb;color:#0f172a}
@@ -188,11 +188,11 @@ async function compose(amountFinal, amountRaw, customer){
   drawPremiumBorder(ctx,W);
 
   const logoQris=new Image();
-  logoQris.src="/qrpay/qris.png";
+  logoQris.src="/qris.png";
   await new Promise(r=>logoQris.onload=r);
 
   const logoGpn=new Image();
-  logoGpn.src="/qrpay/gpn.png";
+  logoGpn.src="/gpn.png";
   await new Promise(r=>logoGpn.onload=r);
 
   ctx.drawImage(logoQris,18,22,120,40);
@@ -302,8 +302,9 @@ document.getElementById("shareBtn").addEventListener("click",async()=>{
 </script>
 
 <!-- REGISTER SERVICE WORKER -->
-<script src="/qrpay/register-service-worker.js"></script>
+<script src="/register-service-worker.js"></script>
 
 </body>
 </html>
+
 
