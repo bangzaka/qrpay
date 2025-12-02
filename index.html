@@ -5,15 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>QR Pay</title>
 
-<!-- ICON PWA -->
-<!-- PWA -->
- <link rel="manifest" href="/qrpay/manifest.json">
-  <meta name="theme-color" content="#1A73E8">
+<!-- PWA FIXED FOR GITHUB PAGES -->
+<link rel="manifest" href="/qrpay/manifest.json">
+<meta name="theme-color" content="#1A73E8">
 
-  <!-- Standar icons -->
- <link rel="icon" href="/qrpay/app-icon-192.png">
-  <link rel="apple-touch-icon" href="/qrpay/app-icon-192.png">
-
+<link rel="icon" href="/qrpay/app-icon-192.png">
+<link rel="apple-touch-icon" href="/qrpay/app-icon-192.png">
 
 <style>
   body{font-family:Inter,Arial;margin:20px;background:#f3f6fb;color:#0f172a}
@@ -24,8 +21,8 @@
   button{padding:10px 14px;border-radius:8px;border:0;background:#0ea5a4;color:white;font-weight:700;cursor:pointer;margin-top:20px}
   #canvasOut{display:block;margin:22px auto;background:white;border-radius:8px}
 </style>
-</head>
 
+</head>
 <body>
 
 <div class="card">
@@ -144,33 +141,27 @@ function roundedRect(ctx, x, y, w, h, r){
 }
 
 function drawPremiumBorder(ctx, W){
-  const padding = 20;
-  const top = 95;
-  const height = 400;
-  const radius = 22;
+  const padding=20, top=95, height=400, radius=22;
+  const x=padding, y=top;
+  const w=W-padding*2, h=height;
 
-  const x = padding, y = top;
-  const w = W - padding * 2, h = height;
-
-  const grad = ctx.createLinearGradient(x, y, x+w, y+h);
-  grad.addColorStop(0, "#0ea5e9");
-  grad.addColorStop(1, "#1e3a8a");
+  const grad=ctx.createLinearGradient(x,y,x+w,y+h);
+  grad.addColorStop(0,"#0ea5e9");
+  grad.addColorStop(1,"#1e3a8a");
 
   ctx.shadowColor="rgba(14,165,233,0.35)";
   ctx.shadowBlur=14;
 
   ctx.strokeStyle=grad;
   ctx.lineWidth=3;
-  roundedRect(ctx, x, y, w, h, radius);
+
+  roundedRect(ctx,x,y,w,h,radius);
   ctx.stroke();
 
   ctx.shadowColor="transparent";
   ctx.shadowBlur=0;
 }
 
-// =====================================================
-// GRADIENT NOMINAL
-// =====================================================
 function nominalGradient(ctx,x,y){
   const g=ctx.createLinearGradient(x-80,y-20,x+80,y+20);
   g.addColorStop(0,"#1E3A8A");
@@ -181,109 +172,101 @@ function nominalGradient(ctx,x,y){
 // =====================================================
 // COMPOSE PNG
 // =====================================================
-async function compose(amountFinal, amountRaw, customer) {
+async function compose(amountFinal, amountRaw, customer){
   const qr=document.getElementById("qrCanvas");
   await new Promise(r=>requestAnimationFrame(r));
 
   const out=document.getElementById("canvasOut");
   const ctx=out.getContext("2d");
 
-  const W=360, H=620; // tinggi dinaikkan biar tidak mepet
-  out.height = H;
+  const W=360, H=620;
+  out.height=H;
 
   ctx.fillStyle="#fff";
   ctx.fillRect(0,0,W,H);
 
-  // BORDER
-  drawPremiumBorder(ctx, W);
+  drawPremiumBorder(ctx,W);
 
-  // LOGO QRIS
   const logoQris=new Image();
- logoQris.src="/qrpay/pvc/qris.png";
+  logoQris.src="/qrpay/pvc/qris.png";
   await new Promise(r=>logoQris.onload=r);
 
-  // LOGO GPN
   const logoGpn=new Image();
- logoGpn.src="/qrpay/pvc/gpn.png";
+  logoGpn.src="/qrpay/pvc/gpn.png";
   await new Promise(r=>logoGpn.onload=r);
 
-  ctx.drawImage(logoQris, 18, 22, 120, 40);
-  ctx.drawImage(logoGpn, W-18-50, 12, 50, 50);
+  ctx.drawImage(logoQris,18,22,120,40);
+  ctx.drawImage(logoGpn,W-18-50,12,50,50);
 
-  // QR code
   const qrW=260;
   ctx.drawImage(qr,(W-qrW)/2,105,qrW,qrW);
 
-  const baseY = 105+qrW+25;
+  const baseY=105+qrW+25;
 
-  // LABEL
   ctx.textAlign="center";
   ctx.fillStyle="#475569";
   ctx.font="14px Arial";
-  ctx.fillText("Jumlah Tagihan", W/2, baseY);
+  ctx.fillText("Jumlah Tagihan",W/2,baseY);
 
-  // NOMINAL
-  const nominalY = baseY+30;
+  const nominalY=baseY+30;
   ctx.font="bold 28px Arial";
   ctx.fillStyle=nominalGradient(ctx,W/2,nominalY);
-  ctx.fillText(formatRp(amountFinal), W/2, nominalY);
+  ctx.fillText(formatRp(amountFinal),W/2,nominalY);
 
-  // MDR
   ctx.font="12px Arial";
   ctx.fillStyle="#64748b";
-  ctx.fillText(`Termasuk MDR 0.3% (Rp ${Number(amountFinal-amountRaw).toLocaleString("id-ID")})`,
-               W/2, nominalY+22);
+  ctx.fillText(
+    `Termasuk MDR 0.3% (Rp ${Number(amountFinal-amountRaw).toLocaleString("id-ID")})`,
+    W/2, nominalY+22
+  );
 
-  // CUSTOMER (DI DALAM BORDER)
   ctx.fillStyle="#000";
   ctx.font="17px Arial";
-  ctx.fillText(customer, W/2, nominalY+55);
+  ctx.fillText(customer,W/2,nominalY+55);
 
-  // FOOTER
   ctx.font="14px Arial";
   ctx.fillStyle="#475569";
-  ctx.fillText("Merchant: My dasteran - BCA | Jember", W/2, H-85);
+  ctx.fillText("Merchant: My dasteran - BCA | Jember",W/2,H-85);
 
   ctx.font="12px Arial";
   ctx.fillStyle="#64748b";
-  ctx.fillText("Bayar menggunakan aplikasi QRIS Anda", W/2, H-60);
-  ctx.fillText("Pastikan nominal sudah sesuai", W/2, H-40);
+  ctx.fillText("Bayar menggunakan aplikasi QRIS Anda",W/2,H-60);
+  ctx.fillText("Pastikan nominal sudah sesuai",W/2,H-40);
 
   return out.toDataURL("image/png");
 }
 
 // =====================================================
-// MAIN BUTTON
+// BUTTON GENERATE
 // =====================================================
-document.getElementById("generateBtn").addEventListener("click", async ()=>{
+document.getElementById("generateBtn").addEventListener("click", async()=>{
   try{
-    const amountRaw = Number(document.getElementById("amount").value.trim());
+    const amountRaw=Number(document.getElementById("amount").value.trim());
     const customer=document.getElementById("customer").value.trim();
+    if(!amountRaw)return alert("Nominal wajib diisi");
 
-    if(!amountRaw) return alert("Nominal wajib diisi");
+    const mdr=Math.ceil(amountRaw*0.003);
+    const amountFinal=amountRaw+mdr;
 
-    const mdr = Math.ceil(amountRaw * 0.003);
-    const amountFinal = amountRaw + mdr;
-
-    let payload = addCustomer(DEFAULT_PAYLOAD,customer);
-    payload = setAmount(payload, amountRaw);
+    let payload=addCustomer(DEFAULT_PAYLOAD,customer);
+    payload=setAmount(payload,amountRaw);
 
     drawQR(payload);
 
-    const png = await compose(amountFinal, amountRaw, customer);
+    const png=await compose(amountFinal,amountRaw,customer);
 
     const dl=document.getElementById("downloadBtn");
-    const safeName = customer !== ""
-      ? "qris_" + customer.replace(/[^a-z0-9]+/gi,"_").toLowerCase() + ".png"
-      : "qris.png";
+    const safeName=customer!=""
+      ?"qris_"+customer.replace(/[^a-z0-9]+/gi,"_").toLowerCase()+".png"
+      :"qris.png";
 
-    dl.href = png;
-    dl.download = safeName;
+    dl.href=png;
+    dl.download=safeName;
     dl.style.display="inline-block";
 
-    const shareBtn = document.getElementById("shareBtn");
-    shareBtn.setAttribute("data-filename", safeName);
-    shareBtn.style.display="inline-block";
+    const s=document.getElementById("shareBtn");
+    s.setAttribute("data-filename",safeName);
+    s.style.display="inline-block";
 
   }catch(e){
     alert("Gagal generate: "+e.message);
@@ -291,9 +274,9 @@ document.getElementById("generateBtn").addEventListener("click", async ()=>{
 });
 
 // =====================================================
-// SHARE WA
+// SHARE WHATSAPP
 // =====================================================
-document.getElementById("shareBtn").addEventListener("click", async()=>{
+document.getElementById("shareBtn").addEventListener("click",async()=>{
   try{
     const dataUrl=document.getElementById("downloadBtn").href;
     const blob=await (await fetch(dataUrl)).blob();
@@ -317,9 +300,9 @@ document.getElementById("shareBtn").addEventListener("click", async()=>{
   }
 });
 </script>
+
+<!-- REGISTER SERVICE WORKER -->
 <script src="/qrpay/register-service-worker.js"></script>
 
 </body>
 </html>
-
-
