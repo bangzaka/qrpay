@@ -1,17 +1,16 @@
-const CACHE_NAME = "qrpay-cache-v2";
+const CACHE_NAME = "qrpay-cache-v3";
 
 const ASSETS = [
-  "/qrpay/",
-  "/qrpay/index.html",
-  "/qrpay/manifest.json",
-  "/qrpay/app-icon-192.png",
-  "/qrpay/app-icon-512.png",
-  "/qrpay/maskable-512.png",
-  "/qrpay/qris.png",
-  "/qrpay/gpn.png",
+  "/",
+  "/index.html",
+  "/manifest.json",
+  "/app-icon-192.png",
+  "/app-icon-512.png",
+  "/maskable-512.png",
+  "/pvc/qris.png",
+  "/pvc/gpn.png"
 ];
 
-// Install — cache statis
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
@@ -19,27 +18,19 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// Activate — bersihkan cache lama
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      )
+      Promise.all(keys.map((key) => key !== CACHE_NAME ? caches.delete(key) : null))
     )
   );
   self.clients.claim();
 });
 
-// Fetch — pengecualian untuk API QR
 self.addEventListener("fetch", (event) => {
   const url = event.request.url;
 
-  // 1️⃣ Lewatkan semua API eksternal (QR server, Supabase)
+  // Bypass all external API
   if (
     url.includes("qrserver") ||
     url.includes("quickchart") ||
@@ -50,7 +41,6 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 2️⃣ Cache first untuk asset statis
   event.respondWith(
     caches.match(event.request).then((cached) => {
       return (
@@ -63,13 +53,11 @@ self.addEventListener("fetch", (event) => {
             });
           })
           .catch(() => {
-            // fallback jika offline
             if (event.request.destination === "document") {
-              return caches.match("/qrpay/index.html");
+              return caches.match("/index.html");
             }
           })
       );
     })
   );
 });
-
