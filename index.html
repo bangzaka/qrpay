@@ -188,11 +188,11 @@ async function compose(amountFinal, amountRaw, customer){
   drawPremiumBorder(ctx,W);
 
   const logoQris=new Image();
-  logoQris.src="/qrpay/pvc/qris.png";
+  logoQris.src="/qrpay/qris.png";
   await new Promise(r=>logoQris.onload=r);
 
   const logoGpn=new Image();
-  logoGpn.src="/qrpay/pvc/gpn.png";
+  logoGpn.src="/qrpay/gpn.png";
   await new Promise(r=>logoGpn.onload=r);
 
   ctx.drawImage(logoQris,18,22,120,40);
@@ -306,3 +306,4 @@ document.getElementById("shareBtn").addEventListener("click",async()=>{
 
 </body>
 </html>
+
