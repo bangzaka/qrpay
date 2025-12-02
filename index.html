@@ -128,37 +128,103 @@ input:focus {
     width: 100%; /* Memastikan container mengambil lebar penuh card */
 }
 
-/* DOWNLOAD & SHARE BUTTONS */
+/* === FULL PREMIUM BUTTON (Glass + Glow + Soft Neu) === */
 .action-btn {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 14px 10px; /* Padding lebih kecil agar lebih padat di mobile */
-    border-radius: 12px;
+    gap: 10px;
+
+    padding: 16px;
+    border-radius: 16px;
     font-weight: 600;
-    text-decoration: none;
-    font-size: 0.95rem;
-    flex-grow: 1; /* Penting: Membuat tombol berbagi ruang yang sama */
-    transition: background-color 0.3s, box-shadow 0.3s;
-    border: none;
+    font-size: 1rem;
+    flex-grow: 1;
+    
     cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.3);
+
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    box-shadow:
+        inset 2px 2px 3px rgba(255, 255, 255, 0.35),
+        inset -2px -2px 4px rgba(0, 0, 0, 0.2),
+        4px 4px 14px rgba(0,0,0,0.18),
+        0 0 18px rgba(255,255,255,0.15);
+    
+    color: white;
+    transition: 0.25s ease;
 }
 
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        inset 2px 2px 3px rgba(255, 255, 255, 0.4),
+        inset -2px -2px 4px rgba(0, 0, 0, 0.25),
+        6px 6px 18px rgba(0,0,0,0.22),
+        0 0 25px rgba(255,255,255,0.25);
+}
+
+.action-btn:active {
+    transform: scale(0.96);
+    box-shadow: none;
+}
+
+/* Color Variants */
 #downloadBtn {
-    background: #059669;
-    color: white;
+    background: linear-gradient(135deg, #059669cc, #047857cc);
+    border: 1px solid rgba(255,255,255,0.35);
 }
 #downloadBtn:hover {
-    background: #047857;
+    background: linear-gradient(135deg, #06b981ee, #04704fee);
 }
 
 #shareBtn {
-    background: #22c55e;
-    color: white;
+    background: linear-gradient(135deg, #22c55ecc, #16a34acc);
+    border: 1px solid rgba(255,255,255,0.35);
 }
 #shareBtn:hover {
-    background: #16a34a;
+    background: linear-gradient(135deg, #31d46cee, #189b45ee);
 }
+
+/* Icon styling */
+.action-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.5;
+    transition: 0.25s ease;
+}
+
+/* Hover animation icon */
+.action-btn:hover svg {
+    transform: scale(1.15);
+}
+
+/* Glow Rings (modern) */
+.action-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.4),
+        rgba(255,255,255,0.05)
+    );
+
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+}
+
 </style>
 
 </head>
@@ -182,16 +248,24 @@ input:focus {
 
   <div class="action-container" style="max-width: 360px;">
     <a id="downloadBtn" download="qris.png"
-       class="action-btn"
-       style="display:none;">
-       Download
-    </a>
+   class="action-btn"
+   style="display:none;">
+   <svg fill="none" stroke="white" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" 
+            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+   </svg>
+   Download
+</a>
 
-    <button id="shareBtn"
-            class="action-btn"
-            style="display:none;">
-      WhatsApp
-    </button>
+<button id="shareBtn"
+        class="action-btn"
+        style="display:none;">
+    <svg fill="none" stroke="white" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.97-4.03 9-9 9a8.96 8.96 0 01-4-.94L3 21l.94-5A8.96 8.96 0 013 12c0-4.97 4.03-9 9-9s9 4.03 9 9z" />
+    </svg>
+    WhatsApp
+</button>
   </div>
 </div>
 
@@ -375,7 +449,7 @@ async function compose(amountFinal, amountRaw, customer, mdrFinal) {
   
   let mdrText;
   if (mdrFinal > 0) {
-    mdrText = `Termasuk MDR 0.3% (Rp ${Number(mdrFinal).toLocaleString("id-ID")})`;
+    mdrText = `Termasuk MDR 0.15% (Rp ${Number(mdrFinal).toLocaleString("id-ID")})`;
   } else {
     mdrText = `MDR 0% (Gratis Potongan)`;
   }
@@ -415,7 +489,7 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
     // --- LOGIKA PERHITUNGAN MDR ---
     let mdr = 0;
     const batasMDR0 = 500000;
-    const tarifMDR = 0.003; // 0.3%
+    const tarifMDR = 0.0015; // 0.15%
 
     if (amountRaw > batasMDR0) {
       mdr = Math.ceil(amountRaw * tarifMDR); 
@@ -485,3 +559,4 @@ document.getElementById("shareBtn").addEventListener("click", async () => {
 
 </body>
 </html>
+
