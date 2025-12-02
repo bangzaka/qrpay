@@ -12,15 +12,55 @@
 <link rel="apple-touch-icon" href="/app-icon-192.png">
 
 <style>
-  body{font-family:Inter,Arial;margin:20px;background:#f3f6fb;color:#0f172a}
-  .card{background:#fff;border-radius:12px;padding:22px;max-width:680px;margin:20px auto;box-shadow:0 8px 24px rgba(2,6,23,0.06)}
-  h2{text-align:center;margin-top:0;margin-bottom:20px}
-  label{font-weight:700;margin-top:12px;display:block}
-  input{width:100%;padding:12px;border-radius:8px;border:1px solid #dbe6f0;font-size:15px;background:#fbfdff}
-  button{padding:10px 14px;border-radius:8px;border:0;background:#0ea5a4;color:white;font-weight:700;cursor:pointer;margin-top:20px}
-  #canvasOut{display:block;margin:22px auto;background:white;border-radius:8px}
+body {
+    font-family: Inter, Arial;
+    margin: 20px;
+    background: #f3f6fb;
+    color: #0f172a;
+}
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 22px;
+    max-width: 680px;
+    margin: 20px auto;
+    box-shadow: 0 8px 24px rgba(2,6,23,0.06);
+}
+h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+label {
+    font-weight: 700;
+    margin-top: 12px;
+    display: block;
+}
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #dbe6f0;
+    font-size: 15px;
+    background: #fbfdff;
+}
+button {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 0;
+    background: #0ea5a4;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 20px;
+}
+#canvasOut {
+    display: block;
+    margin: 22px auto;
+    background: white;
+    border-radius: 8px;
+}
 </style>
-
 </head>
 <body>
 
@@ -56,12 +96,12 @@
 <script>
 // =====================================================
 // PAYLOAD DEFAULT
-// PERBAIKAN: Mengubah 010211 menjadi 010212 (QRIS Dinamis dengan Nominal Ditetapkan)
+// Menggunakan 010212 (QRIS Dinamis dengan Nominal Ditetapkan)
 // =====================================================
 const DEFAULT_PAYLOAD = "00020101021226650013ID.CO.BCA.WWW011893600014000417288002150008850041728800303UMI51440014ID.CO.QRIS.WWW0215ID10254453013320303UMI5204569153033605802ID5911My dasteran6006JEMBER610568162070703A016304E41A";
 
 // =====================================================
-// TLV HELPERS (Tidak ada perubahan di sini)
+// TLV HELPERS
 // =====================================================
 function parseTLV(p) {
   const o = []; let i = 0;
@@ -102,12 +142,10 @@ function addCustomer(p, name) {
   return rebuildTLV(tlv);
 }
 
-// PERBAIKAN: Nominal yang dimasukkan ke QRIS (amount) di sini adalah amountFinal
 function setAmount(p, amount) {
   let tlv = parseTLV(p).filter(t => t.id !== "63");
   const i = tlv.findIndex(t => t.id === "54");
   
-  // Pastikan amount adalah string bilangan bulat (tanpa .00) untuk QRIS standar
   const amountStr = String(Math.round(amount)); 
   
   if (i !== -1) tlv[i].value = amountStr;
@@ -120,7 +158,7 @@ function setAmount(p, amount) {
 function formatRp(n) {
   return "Rp " + Number(n).toLocaleString("id-ID");
 }
-// ... (Fungsi drawQR, roundedRect, drawPremiumBorder, nominalGradient, compose tidak berubah karena fungsinya sudah benar) ...
+
 function drawQR(text) {
   new QRious({
     element: document.getElementById("qrCanvas"),
@@ -130,6 +168,9 @@ function drawQR(text) {
   });
 }
 
+// =====================================================
+// BORDER PREMIUM (Tidak ada perubahan)
+// =====================================================
 function roundedRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -173,6 +214,9 @@ function nominalGradient(ctx, x, y) {
   return g;
 }
 
+// =====================================================
+// COMPOSE PNG (Tidak ada perubahan)
+// =====================================================
 async function compose(amountFinal, amountRaw, customer) {
   const qr = document.getElementById("qrCanvas");
   await new Promise(r => requestAnimationFrame(r));
@@ -234,9 +278,8 @@ async function compose(amountFinal, amountRaw, customer) {
   return out.toDataURL("image/png");
 }
 
-
 // =====================================================
-// BUTTON GENERATE - PERBAIKAN LOGIKA UTAMA
+// BUTTON GENERATE (Menggunakan amountFinal untuk payload)
 // =====================================================
 document.getElementById("generateBtn").addEventListener("click", async () => {
   try {
@@ -246,15 +289,15 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
 
     // 1. HITUNG MDR dan NOMINAL AKHIR
     const mdr = Math.ceil(amountRaw * 0.003); 
-    const amountFinal = amountRaw + mdr; // Nominal yang di-scan dan dibayarkan konsumen
+    const amountFinal = amountRaw + mdr; 
 
     // 2. GENERATE PAYLOAD QRIS DENGAN amountFinal
     let payload = addCustomer(DEFAULT_PAYLOAD, customer);
-    payload = setAmount(payload, amountFinal); // <-- Menggunakan amountFinal
+    payload = setAmount(payload, amountFinal); 
 
-    drawQR(payload); // Menggambar QR dengan payload yang sudah termasuk MDR
+    drawQR(payload); 
 
-    // 3. COMPOSE PNG (amountFinal untuk tagihan, amountRaw untuk catatan MDR)
+    // 3. COMPOSE PNG
     const png = await compose(amountFinal, amountRaw, customer);
 
     const dl = document.getElementById("downloadBtn");
@@ -274,7 +317,10 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
     alert("Gagal generate: " + e.message);
   }
 });
-// ... (Sisa fungsi share tidak berubah) ...
+
+// =====================================================
+// SHARE WHATSAPP (Tidak ada perubahan)
+// =====================================================
 document.getElementById("shareBtn").addEventListener("click", async () => {
   try {
     const dataUrl = document.getElementById("downloadBtn").href;
@@ -298,7 +344,6 @@ document.getElementById("shareBtn").addEventListener("click", async () => {
     alert("Gagal share: " + e.message);
   }
 });
-// ... (Sisa kode Service Worker) ...
 </script>
 
 <script src="/register-service-worker.js"></script>
