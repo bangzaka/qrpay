@@ -1,8 +1,8 @@
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register('/qrpay/service-worker.js');
+    navigator.serviceWorker
+      .register("/qrpay/service-worker.js")
       .then(() => console.log("SW registered"))
       .catch(err => console.warn("SW failed", err));
   });
 }
-
