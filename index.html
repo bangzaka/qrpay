@@ -6,7 +6,7 @@
 <title>QR Pay - PWA Mobile</title>
 
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0ea5e9"> 
+<meta name="theme-color" content="#3b82f6"> 
 <link rel="icon" href="/app-icon-192.png">
 <link rel="apple-touch-icon" href="/app-icon-192.png">
 
@@ -21,7 +21,7 @@ body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    background: #f4f7f9; /* Latar belakang lebih cerah */
+    background: #f4f7f9;
     color: #1f2937;
     display: flex;
     flex-direction: column;
@@ -32,12 +32,12 @@ body {
 /* CARD CONTAINER */
 .card {
     background: #ffffff;
-    border-radius: 20px; /* Lebih rounded */
+    border-radius: 20px;
     padding: 30px 24px;
     width: 90%;
     max-width: 400px; 
-    margin: 30px auto;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1); /* Bayangan lebih halus */
+    margin: 20px auto; /* Margin atas dikurangi agar lebih proporsional */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
 }
 
@@ -46,7 +46,7 @@ h2 {
     font-size: 1.6rem;
     margin-top: 0;
     margin-bottom: 28px;
-    color: #111827; /* Lebih gelap */
+    color: #111827;
     font-weight: 800;
 }
 
@@ -62,7 +62,7 @@ label {
 
 input {
     width: 100%;
-    padding: 15px 12px; /* Area sentuh lebih besar */
+    padding: 15px 12px;
     border-radius: 12px;
     border: 1px solid #d1d5db;
     font-size: 1.05rem;
@@ -76,13 +76,13 @@ input:focus {
     outline: none;
 }
 
-/* BUTTON UTAMA */
+/* BUTTON UTAMA (Buat QRIS) */
 #generateBtn {
     width: 100%; 
     padding: 16px 14px; 
     border-radius: 12px;
     border: none;
-    background: #3b82f6; /* Biru yang kuat */
+    background: #3b82f6;
     color: white;
     font-weight: 700;
     cursor: pointer;
@@ -99,45 +99,53 @@ input:focus {
     box-shadow: none;
 }
 
-/* CANVAS OUTPUT */
+/* --- PERBAIKAN UTAMA DI SINI: CANVAS OUTPUT & CONTAINER --- */
+.canvas-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 25px 0; /* Memberikan jarak atas dan bawah */
+}
+
 #canvasOut {
     display: block;
-    margin: 30px auto;
+    /* Dibuat lebih responsif untuk mobile: ukuran maksimal 90% lebar container */
+    max-width: 90%; 
+    width: 360px; /* Ukuran default */
+    height: 620px; /* Ukuran default */
     background: white;
     border-radius: 15px;
-    width: 360px;
-    height: 620px; 
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* DOWNLOAD & SHARE CONTAINER */
 .action-container {
     display: flex;
-    justify-content: center;
+    justify-content: space-between; /* Membuat tombol mengisi ruang secara merata */
     gap: 12px;
-    margin-top: 10px;
+    margin-top: 20px;
     margin-bottom: 10px;
+    width: 100%; /* Memastikan container mengambil lebar penuh card */
 }
 
 /* DOWNLOAD & SHARE BUTTONS */
 .action-btn {
-    display: flex; /* Memastikan tampilan yang benar */
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 14px 18px;
+    padding: 14px 10px; /* Padding lebih kecil agar lebih padat di mobile */
     border-radius: 12px;
     font-weight: 600;
     text-decoration: none;
     font-size: 0.95rem;
-    flex-grow: 1; 
-    max-width: 180px;
+    flex-grow: 1; /* Penting: Membuat tombol berbagi ruang yang sama */
     transition: background-color 0.3s, box-shadow 0.3s;
     border: none;
     cursor: pointer;
 }
 
 #downloadBtn {
-    background: #059669; /* Hijau modern */
+    background: #059669;
     color: white;
 }
 #downloadBtn:hover {
@@ -145,7 +153,7 @@ input:focus {
 }
 
 #shareBtn {
-    background: #22c55e; /* Hijau WhatsApp */
+    background: #22c55e;
     color: white;
 }
 #shareBtn:hover {
@@ -166,11 +174,13 @@ input:focus {
   <input id="customer" placeholder="Nama Customer"/>
 
   <button id="generateBtn">Buat QRIS</button>
+</div>
 
+<div class="canvas-container">
   <canvas id="qrCanvas" width="300" height="300" style="display:none"></canvas>
   <canvas id="canvasOut"></canvas>
 
-  <div class="action-container">
+  <div class="action-container" style="max-width: 360px;">
     <a id="downloadBtn" download="qris.png"
        class="action-btn"
        style="display:none;">
@@ -190,12 +200,11 @@ input:focus {
 <script>
 // =====================================================
 // PAYLOAD DEFAULT
-// ID 010212 (QRIS Dinamis - Nominal Ditetapkan)
 // =====================================================
 const DEFAULT_PAYLOAD = "00020101021226650013ID.CO.BCA.WWW011893600014000417288002150008850041728800303UMI51440014ID.CO.QRIS.WWW0215ID10254453013320303UMI5204569153033605802ID5911My dasteran6006JEMBER610568162070703A016304E41A";
 
 // =====================================================
-// TLV HELPERS
+// TLV HELPERS (Tidak Berubah)
 // =====================================================
 function parseTLV(p) {
   const o = []; let i = 0;
@@ -254,18 +263,18 @@ function formatRp(n) {
   return "Rp " + Number(n).toLocaleString("id-ID");
 }
 
-// FUNGSI INTI - Meningkatkan resolusi QR code
+// FUNGSI INTI - Meningkatkan resolusi QR code (Tidak Berubah)
 function drawQR(text) {
   new QRious({
     element: document.getElementById("qrCanvas"),
     value: text,
-    size: 600, // Ukuran digandakan untuk HD
+    size: 600,
     level: "H"
   });
 }
 
 // =====================================================
-// BORDER & GRADIENT
+// BORDER & GRADIENT (Tidak Berubah)
 // =====================================================
 function roundedRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -287,8 +296,8 @@ function drawPremiumBorder(ctx, W) {
   const w = W - padding * 2, h = height;
 
   const grad = ctx.createLinearGradient(x, y, x + w, y + h);
-  grad.addColorStop(0, "#3b82f6"); // Gradient baru
-  grad.addColorStop(1, "#1e40af"); // Gradient baru
+  grad.addColorStop(0, "#3b82f6");
+  grad.addColorStop(1, "#1e40af");
 
   ctx.shadowColor = "rgba(59, 130, 246, 0.35)";
   ctx.shadowBlur = 14;
@@ -311,7 +320,7 @@ function nominalGradient(ctx, x, y) {
 }
 
 // =====================================================
-// COMPOSE PNG - Disesuaikan untuk MDR & Desain Baru
+// COMPOSE PNG (Tidak Berubah)
 // =====================================================
 async function compose(amountFinal, amountRaw, customer, mdrFinal) {
   const qr = document.getElementById("qrCanvas");
@@ -326,7 +335,7 @@ async function compose(amountFinal, amountRaw, customer, mdrFinal) {
 
   out.width = W_base * scale;
   out.height = H_base * scale;
-  ctx.scale(scale, scale); // Skalakan seluruh konteks
+  ctx.scale(scale, scale);
 
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, W_base, H_base); 
@@ -360,7 +369,7 @@ async function compose(amountFinal, amountRaw, customer, mdrFinal) {
   ctx.fillStyle = nominalGradient(ctx, W_base / 2, nominalY);
   ctx.fillText(formatRp(amountFinal), W_base / 2, nominalY);
 
-  // LOGIKA TAMPILAN MDR BARU
+  // LOGIKA TAMPILAN MDR
   ctx.font = "12px Arial";
   ctx.fillStyle = "#64748b";
   
@@ -372,7 +381,6 @@ async function compose(amountFinal, amountRaw, customer, mdrFinal) {
   }
   
   ctx.fillText(mdrText, W_base / 2, nominalY + 22);
-  // END LOGIKA TAMPILAN MDR BARU
 
   ctx.fillStyle = "#000";
   ctx.font = "17px Arial";
@@ -404,21 +412,19 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
       return alert("Nominal wajib diisi dan harus berupa angka positif.");
     }
 
-    // --- LOGIKA PERHITUNGAN MDR BARU ---
+    // --- LOGIKA PERHITUNGAN MDR ---
     let mdr = 0;
     const batasMDR0 = 500000;
     const tarifMDR = 0.003; // 0.3%
 
     if (amountRaw > batasMDR0) {
-      // Jika transaksi DI ATAS Rp500.000, hitung MDR 0.3%
       mdr = Math.ceil(amountRaw * tarifMDR); 
     } else {
-      // Jika transaksi <= Rp500.000, MDR 0%
       mdr = 0;
     }
     
     const amountFinal = amountRaw + mdr; 
-    // --- END LOGIKA PERHITUNGAN MDR BARU ---
+    // --- END LOGIKA PERHITUNGAN MDR ---
 
     // Masukkan amountFinal ke payload QRIS
     let payload = addCustomer(DEFAULT_PAYLOAD, customer);
