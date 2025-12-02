@@ -13,135 +13,143 @@
 <style>
 /* FONT FALLBACK */
 :root {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 /* BASE STYLING */
 body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    background: #f0f4f8; /* Latar belakang lebih lembut */
-    color: #1a202c;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: #f4f7f9; /* Latar belakang lebih cerah */
+    color: #1f2937;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 /* CARD CONTAINER */
 .card {
-    background: #ffffff;
-    border-radius: 16px; 
-    padding: 24px;
-    width: 90%;
-    max-width: 400px; 
-    margin: 20px auto;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Bayangan modern */
-    box-sizing: border-box;
+    background: #ffffff;
+    border-radius: 20px; /* Lebih rounded */
+    padding: 30px 24px;
+    width: 90%;
+    max-width: 400px; 
+    margin: 30px auto;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1); /* Bayangan lebih halus */
+    box-sizing: border-box;
 }
 
 h2 {
-    text-align: center;
-    font-size: 1.5rem;
-    margin-top: 0;
-    margin-bottom: 25px;
-    color: #0d47a1;
+    text-align: center;
+    font-size: 1.6rem;
+    margin-top: 0;
+    margin-bottom: 28px;
+    color: #111827; /* Lebih gelap */
+    font-weight: 800;
 }
 
 /* INPUT & LABEL */
 label {
-    font-weight: 600;
-    margin-top: 15px;
-    display: block;
-    font-size: 0.95rem;
-    color: #4a5568;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 6px;
+    display: block;
+    font-size: 0.9rem;
+    color: #4b5563;
 }
 
 input {
-    width: 100%;
-    padding: 14px 10px; /* Area sentuh lebih besar */
-    border-radius: 10px;
-    border: 1px solid #cbd5e0;
-    font-size: 1.1rem;
-    background: #f7fafc;
-    box-sizing: border-box;
-    transition: border-color 0.3s;
+    width: 100%;
+    padding: 15px 12px; /* Area sentuh lebih besar */
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    font-size: 1.05rem;
+    background: #ffffff;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 input:focus {
-    border-color: #4299e1;
-    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    outline: none;
 }
 
 /* BUTTON UTAMA */
 #generateBtn {
-    width: 100%; 
-    padding: 15px 14px; 
-    border-radius: 10px;
-    border: 0;
-    background: #0ea5e9; /* Warna utama */
-    color: white;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 30px;
-    font-size: 1.1rem;
-    box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
-    transition: background-color 0.3s, box-shadow 0.3s;
+    width: 100%; 
+    padding: 16px 14px; 
+    border-radius: 12px;
+    border: none;
+    background: #3b82f6; /* Biru yang kuat */
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 30px;
+    font-size: 1.1rem;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+#generateBtn:hover {
+    background: #2563eb;
 }
 #generateBtn:active {
-    background: #078dd4; 
-    box-shadow: none;
+    background: #1d4ed8; 
+    box-shadow: none;
 }
 
 /* CANVAS OUTPUT */
 #canvasOut {
-    display: block;
-    margin: 25px auto;
-    background: white;
-    border-radius: 10px;
-    /* Ukuran dasar untuk tampilan browser */
-    width: 360px;
-    height: 620px; 
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    display: block;
+    margin: 30px auto;
+    background: white;
+    border-radius: 15px;
+    width: 360px;
+    height: 620px; 
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* DOWNLOAD & SHARE CONTAINER */
-.card > div:last-child {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-    margin-bottom: 10px;
+.action-container {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 /* DOWNLOAD & SHARE BUTTONS */
-#downloadBtn, #shareBtn {
-    /* Style inline di HTML akan override display:none; ini */
-    display: flex !important; 
-    align-items: center;
-    justify-content: center;
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-weight: 600;
-    text-decoration: none;
-    font-size: 0.95rem;
-    flex-grow: 1; 
-    max-width: 180px;
-    transition: opacity 0.3s;
+.action-btn {
+    display: flex; /* Memastikan tampilan yang benar */
+    align-items: center;
+    justify-content: center;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+    flex-grow: 1; 
+    max-width: 180px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    border: none;
+    cursor: pointer;
 }
 
 #downloadBtn {
-    background: #2563eb;
-    color: white;
+    background: #059669; /* Hijau modern */
+    color: white;
+}
+#downloadBtn:hover {
+    background: #047857;
 }
 
 #shareBtn {
-    background: #22c55e;
-    color: white;
+    background: #22c55e; /* Hijau WhatsApp */
+    color: white;
 }
-
-#downloadBtn:active, #shareBtn:active {
-    opacity: 0.8;
+#shareBtn:hover {
+    background: #16a34a;
 }
 </style>
 
@@ -151,7 +159,7 @@ input:focus {
 <div class="card">
   <h2>QR Pay - MYDASTERAN</h2>
 
-  <label>Total Tagihan</label>
+  <label>Total Tagihan (Rp)</label>
   <input id="amount" placeholder="15000" type="number" min="1"/>
 
   <label>Nama Customer</label>
@@ -162,14 +170,16 @@ input:focus {
   <canvas id="qrCanvas" width="300" height="300" style="display:none"></canvas>
   <canvas id="canvasOut"></canvas>
 
-  <div style="text-align:center; margin-top:12px;">
+  <div class="action-container">
     <a id="downloadBtn" download="qris.png"
-       style="display:none;background:#2563eb;color:white;padding:12px 18px;border-radius:10px; margin-right:8px;">
+       class="action-btn"
+       style="display:none;">
        Download
     </a>
 
     <button id="shareBtn"
-            style="display:none;background:#22c55e;color:white;padding:12px 18px;border-radius:10px;">
+            class="action-btn"
+            style="display:none;">
       WhatsApp
     </button>
   </div>
@@ -277,10 +287,10 @@ function drawPremiumBorder(ctx, W) {
   const w = W - padding * 2, h = height;
 
   const grad = ctx.createLinearGradient(x, y, x + w, y + h);
-  grad.addColorStop(0, "#0ea5e9");
-  grad.addColorStop(1, "#1e3a8a");
+  grad.addColorStop(0, "#3b82f6"); // Gradient baru
+  grad.addColorStop(1, "#1e40af"); // Gradient baru
 
-  ctx.shadowColor = "rgba(14,165,233,0.35)";
+  ctx.shadowColor = "rgba(59, 130, 246, 0.35)";
   ctx.shadowBlur = 14;
 
   ctx.strokeStyle = grad;
@@ -295,13 +305,13 @@ function drawPremiumBorder(ctx, W) {
 
 function nominalGradient(ctx, x, y) {
   const g = ctx.createLinearGradient(x - 80, y - 20, x + 80, y + 20);
-  g.addColorStop(0, "#1E3A8A");
-  g.addColorStop(1, "#0EA5E9");
+  g.addColorStop(0, "#1E40AF");
+  g.addColorStop(1, "#3B82F6");
   return g;
 }
 
 // =====================================================
-// COMPOSE PNG - Menerapkan faktor skala untuk HD (Disesuaikan untuk MDR)
+// COMPOSE PNG - Disesuaikan untuk MDR & Desain Baru
 // =====================================================
 async function compose(amountFinal, amountRaw, customer, mdrFinal) {
   const qr = document.getElementById("qrCanvas");
@@ -324,15 +334,11 @@ async function compose(amountFinal, amountRaw, customer, mdrFinal) {
   drawPremiumBorder(ctx, W_base);
 
   const logoQris = new Image();
-  // Ganti dengan path logo QRIS yang benar
-  // Misalnya: logoQris.src = "https://i.imgur.com/your-qris-logo.png";
-  logoQris.src = "/qris.png"; 
+  logoQris.src = "/qris.png";
   await new Promise(r => logoQris.onload = r);
 
   const logoGpn = new Image();
-  // Ganti dengan path logo GPN yang benar
-  // Misalnya: logoGpn.src = "https://i.imgur.com/your-gpn-logo.png";
-  logoGpn.src = "/gpn.png"; 
+  logoGpn.src = "/gpn.png";
   await new Promise(r => logoGpn.onload = r);
 
   // Menggambar dengan koordinat dasar
