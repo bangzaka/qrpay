@@ -235,40 +235,45 @@ async function compose(amountFinal, amountRaw, customer) {
 }
 
 // =====================================================
-// BUTTON GENERATE
+// BUTTON GENERATE - PERBAIKAN FINAL
 // =====================================================
 document.getElementById("generateBtn").addEventListener("click", async () => {
-  try {
-    const amountRaw = Number(document.getElementById("amount").value.trim());
-    const customer = document.getElementById("customer").value.trim();
-    if (!amountRaw) return alert("Nominal wajib diisi");
+  try {
+    const amountRaw = Number(document.getElementById("amount").value.trim());
+    const customer = document.getElementById("customer").value.trim();
+    if (!amountRaw) return alert("Nominal wajib diisi");
 
-    const mdr = Math.ceil(amountRaw * 0.003);
-    const amountFinal = amountRaw + mdr;
+    // HITUNG MDR (0.3%) DAN NOMINAL AKHIR
+    const mdr = Math.ceil(amountRaw * 0.003); 
+    const amountFinal = amountRaw + mdr; // Nominal total yang AKAN dimasukkan ke QRIS
 
-    let payload = addCustomer(DEFAULT_PAYLOAD, customer);
-    payload = setAmount(payload, amountRaw);
+    let payload = addCustomer(DEFAULT_PAYLOAD, customer);
+    
+    // PERUBAHAN UTAMA: SET NOMINAL DENGAN NILAI YANG SUDAH TERMASUK MDR (amountFinal)
+    payload = setAmount(payload, amountFinal); 
 
-    drawQR(payload);
+    drawQR(payload); // Menggambar QR dengan payload yang berisi amountFinal
 
-    const png = await compose(amountFinal, amountRaw, customer);
+    // COMPOSE PNG: amountFinal sebagai tagihan, amountRaw sebagai dasar perhitungan
+    const png = await compose(amountFinal, amountRaw, customer); 
 
-    const dl = document.getElementById("downloadBtn");
-    const safeName = customer != ""
-      ? "qris_" + customer.replace(/[^a-z0-9]+/gi, "_").toLowerCase() + ".png"
-      : "qris.png";
+    const dl = document.getElementById("downloadBtn");
+    // ... (Sisa kode untuk download dan share) ...
+    const safeName = customer != ""
+      ? "qris_" + customer.replace(/[^a-z0-9]+/gi, "_").toLowerCase() + ".png"
+      : "qris.png";
 
-    dl.href = png;
-    dl.download = safeName;
-    dl.style.display = "inline-block";
+    dl.href = png;
+    dl.download = safeName;
+    dl.style.display = "inline-block";
 
-    const s = document.getElementById("shareBtn");
-    s.setAttribute("data-filename", safeName);
-    s.style.display = "inline-block";
+    const s = document.getElementById("shareBtn");
+    s.setAttribute("data-filename", safeName);
+    s.style.display = "inline-block";
 
-  } catch (e) {
-    alert("Gagal generate: " + e.message);
-  }
+  } catch (e) {
+    alert("Gagal generate: " + e.message);
+  }
 });
 
 // =====================================================
@@ -304,6 +309,7 @@ document.getElementById("shareBtn").addEventListener("click", async () => {
 
 </body>
 </html>
+
 
 
 
